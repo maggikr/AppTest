@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <item
+        android:id="@+id/item_search"
+        android:title="Søk"
+        android:icon="@drawable/search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        />
+    <item
+        android:id="@+id/item_login"
+        android:title="Logg inn"
+        />
+    <item
+        android:id="@+id/item_regEvent"
+        android:title="Registrer Hendelse"
+        />
+    <item
+        android:id="@+id/item_profile"
+        android:title="Profil"
+        />
+    <item
+        android:id="@+id/item_settings"
+        android:title="Innstillinger"
+        />
+    <item
+        android:id="@+id/item_help"
+        android:title="Hjelp"
+        />
+
+</menu>
