@@ -1,11 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.maggs.fishapp.RegisterActivity">
+    tools:context="com.example.maggs.fishapp.RegisterActivity"
+    android:layout_marginBottom="12dp">
+
     <include
         android:id="@+id/main_toolbar"
         layout="@layout/toolbar"/>
-</android.support.constraint.ConstraintLayout>
+
+    <EditText
+        android:id="@+id/idText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/main_toolbar"
+        android:layout_marginLeft="16dp"
+        android:ems="10"
+        android:hint="ID" />
+
+    <EditText
+        android:id="@+id/fishTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/idText"
+        android:layout_marginLeft="16dp"
+        android:ems="10"
+        android:hint="Fish type"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/locText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fishTypeText"
+        android:layout_marginLeft="16dp"
+        android:ems="10"
+        android:hint="location"
+        android:inputType="textPersonName" />
+
+    <Button
+        android:id="@+id/registerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="110dp"
+        android:text="Registrer"
+        android:onClick="onClickRegister"/>
+
+
+</RelativeLayout>

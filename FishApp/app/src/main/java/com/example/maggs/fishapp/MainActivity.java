@@ -7,8 +7,11 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -20,10 +23,22 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private GoogleMap gMap;
+    // Write a message to the database
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference("fishLocations");
+
 
     //Variabler for å sjekke permission
     private String[] locationPermission = {Manifest.permission.ACCESS_FINE_LOCATION};
@@ -38,9 +53,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         //Legger til egen toolbar øverst i app
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        Toolbar toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
-
 
     }
 
@@ -81,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
+
+
     // Kjøres når kartet er lastet inn
     // Legger til "marker" i halden og zoomer inn på lokasjonen
     // Kjører også metoder for å sjekke at det er gitt permission til brukers lokasjon
@@ -94,8 +110,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title("Marker in Halden"));
         gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
 
+        // Read from the database
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                for (DataSnapshot fishLocs: dataSnapshot.getChildren()) {
+                    FishLoc fishLoc = fishLocs.getValue(FishLoc.class);
+                    Log.d("maggiDB", "Value is: " + dataSnapshot.getChildrenCount());
+                    gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
+                            .title(fishLoc.getFishType())
+                            .snippet("ID: " + fishLoc.getId()));
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w("maggiDB", "Failed to read value.", error.toException());
+            }
+
+        });
+        gMap.setInfoWindowAdapter(new MyInfoWindow(this));
+        /*gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                                      @Override
+                                      public View getInfoWindow(Marker marker) {
+                                          View view = rentClusterManager.getMarkerManager().getInfoWindow(marker);
+                                          if (view == null)
+                                              view = saleClusterManager.getMarkerManager().getInfoWindow(marker);
+                                          return view;
+                                      }
+
+                                      @Override
+                                      public View getInfoContents(Marker marker) {
+                                          return null;
+                                      }
+                                  });*/
+
+
         setLocationEnabled();
         setDefaultUiSettings();
+        gMap.setOnMapLongClickListener(this);
     }
 
     private void setDefaultUiSettings() {
@@ -120,4 +177,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LOCATION_PERMISSION, locationPermission);
         }
     }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        startActivity(new Intent(this, RegisterActivity.class)
+                .putExtra("LatLng", latLng));
+    }
+
+    //Obsolete
+    /*
+    protected void onResume() {
+        super.onResume();
+
+        ArrayList<FishLoc> locList = FishLoc.getFishLocList();
+
+        for (int i = 0; i < locList.size(); i++){
+            Log.v("Maggi main", "verdi :"+ locList.get(i));
+            //gMap.addMarker(new MarkerOptions().position(locList.get(i).getLoc())
+            //        .title("Hei"));
+        }
+    }*/
+
+
 }
