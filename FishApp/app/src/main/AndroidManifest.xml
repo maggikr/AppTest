@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.maggs.fishapp">
-    //Gir tilgang til Internett og brukers lokasjon
+    //Grants access to internet and users location
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
+    //Informs google play that the app can use the camera, but it's not required to use the app.
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -40,6 +42,7 @@
         <activity android:name=".HelpActivity"
             android:parentActivityName="com.example.maggs.fishapp.MainActivity">
         </activity>
+
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
