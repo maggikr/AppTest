@@ -1,15 +1,13 @@
 package com.example.maggs.fishapp;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-<<<<<<< HEAD
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
-=======
->>>>>>> parent of b72637d... added bottomsheet
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -18,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -42,6 +41,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private GoogleMap gMap;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private View bottomSheet;
     // Write a message to the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("fishLocations");
@@ -63,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
-<<<<<<< HEAD
         bottomSheet = findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setPeekHeight(400);
@@ -77,8 +77,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapLongClick(LatLng latLng) {
         startActivity(new Intent(this, RegisterActivity.class)
                 .putExtra("LatLng", latLng));
-=======
->>>>>>> parent of b72637d... added bottomsheet
     }
 
     // Laster inn meny/søkeknapp i toolbar
@@ -137,8 +135,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
+                // This method is called at application startup and when the DB is updated
+                //Iterates through the DB snapshot, adding Fishloc objects and markers.
                 for (DataSnapshot fishLocs: dataSnapshot.getChildren()) {
                     FishLoc fishLoc = fishLocs.getValue(FishLoc.class);
                     Log.d("maggiDB", "Value is: " + dataSnapshot.getChildrenCount());
@@ -156,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         });
-<<<<<<< HEAD
 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -193,9 +190,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         //gMap.setInfoWindowAdapter(new MyInfoWindow(this));
-=======
-        gMap.setInfoWindowAdapter(new MyInfoWindow(this));
->>>>>>> parent of b72637d... added bottomsheet
         /*gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
                                       @Override
                                       public View getInfoWindow(Marker marker) {
@@ -212,10 +206,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                   });*/
 
 
-        setLocationEnabled();
-        setDefaultUiSettings();
-        gMap.setOnMapLongClickListener(this);
-    }
+
+
+
 
     private void setDefaultUiSettings() {
         UiSettings uiSettings = gMap.getUiSettings();
@@ -226,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     //Sjekker om bruker har gitt lokasjons permission, ber om permission om det ikke er gitt.
+    @SuppressLint("MissingPermission")
     @AfterPermissionGranted(LOCATION_PERMISSION)
     private void setLocationEnabled() {
 

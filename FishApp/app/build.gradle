@@ -33,6 +33,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:11.4.2'
     testCompile 'junit:junit:4.12'
     compile 'pub.devrel:easypermissions:1.0.1'
+    compile 'com.android.support:design:26.1.0'
 }
 
 
