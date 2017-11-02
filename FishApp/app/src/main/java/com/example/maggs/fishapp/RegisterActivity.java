@@ -32,11 +32,12 @@ public class RegisterActivity extends AppCompatActivity {
 
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+        if(getIntent().hasExtra("LatLng")){
+            LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
+            coords = (EditText) findViewById(R.id.locText);
+            coords.setText(latLng.latitude +", "+latLng.longitude);
+        }
 
-        LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
-        coords = (EditText) findViewById(R.id.locText);
-
-        coords.setText(latLng.latitude +", "+latLng.longitude);
     }
 
     public void onClickRegister(View view){

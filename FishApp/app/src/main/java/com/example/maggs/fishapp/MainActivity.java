@@ -2,6 +2,7 @@ package com.example.maggs.fishapp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
@@ -60,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Legger til egen toolbar øverst i app
         Toolbar toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
-
+        /*
         bottomSheet = findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setPeekHeight(400);
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
+        */
     }
 
     // Laster inn meny/søkeknapp i toolbar
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         });
-
+        /*
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapClick(LatLng latLng) {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
-        });
+        });*/
 
         setLocationEnabled();
         setDefaultUiSettings();
@@ -166,13 +167,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
         //Updates bottom sheet text views with info from marker and shows the bottom sheet
-        private void updateBottomSheetContent(Marker marker) {
+       /* private void updateBottomSheetContent(Marker marker) {
             TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
             TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
             title.setText(marker.getTitle());
             snippet.setText(marker.getSnippet());
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        }*/
 
 
         //gMap.setInfoWindowAdapter(new MyInfoWindow(this));
@@ -222,6 +223,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapLongClick(LatLng latLng) {
+        Context context = getApplicationContext();
+        CharSequence text = "Hello toast!";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
         startActivity(new Intent(this, RegisterActivity.class)
                 .putExtra("LatLng", latLng));
     }
