@@ -50,23 +50,5 @@
         android:text="Registrer"
         android:onClick="onClickRegister"/>
 
-    <ImageView
-        android:id="@+id/camImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/main_toolbar"
-        android:layout_toRightOf="@+id/idText"
-        app:srcCompat="@android:color/darker_gray" />
-
-    <Button
-        android:id="@+id/imageBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/camImage"
-        android:text="Select image"
-        android:onClick="onClickSelectImage"/>
-
 
 </RelativeLayout>

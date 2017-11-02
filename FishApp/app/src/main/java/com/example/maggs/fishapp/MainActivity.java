@@ -4,10 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -70,13 +67,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-
-    }
-
-    @Override
-    public void onMapLongClick(LatLng latLng) {
-        startActivity(new Intent(this, RegisterActivity.class)
-                .putExtra("LatLng", latLng));
     }
 
     // Laster inn meny/søkeknapp i toolbar
@@ -163,30 +153,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         //Hides bottom sheet on map clicks
-        /*gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
-        });*/
+        });
 
         setLocationEnabled();
         setDefaultUiSettings();
 
     }
 
-    //Updates bottom sheet text views with info from marker and shows the bottom sheet
-    private void updateBottomSheetContent(Marker marker) {
-        TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
-        TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
-        title.setText(marker.getTitle());
-        snippet.setText(marker.getSnippet());
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-    }
-
-
-
-
+        //Updates bottom sheet text views with info from marker and shows the bottom sheet
+        private void updateBottomSheetContent(Marker marker) {
+            TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
+            TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
+            title.setText(marker.getTitle());
+            snippet.setText(marker.getSnippet());
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
 
 
         //gMap.setInfoWindowAdapter(new MyInfoWindow(this));
@@ -234,7 +220,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        startActivity(new Intent(this, RegisterActivity.class)
+                .putExtra("LatLng", latLng));
+    }
 
     //Obsolete
     /*
