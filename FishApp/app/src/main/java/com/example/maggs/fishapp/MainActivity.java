@@ -39,11 +39,11 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private GoogleMap gMap;
-    private BottomSheetBehavior bottomSheetBehavior;
-    private View bottomSheet;
     // Write a message to the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("fishLocations");
+    private View bottomSheet;
+    private BottomSheetBehavior bottomSheetBehavior;
 
 
     //Variabler for å sjekke permission
@@ -61,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Legger til egen toolbar øverst i app
         Toolbar toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
-        /*
+
         bottomSheet = findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setPeekHeight(400);
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        */
+
     }
 
     // Laster inn meny/søkeknapp i toolbar
@@ -126,8 +126,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called at application startup and when the DB is updated
-                //Iterates through the DB snapshot, adding Fishloc objects and markers.
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
                 for (DataSnapshot fishLocs: dataSnapshot.getChildren()) {
                     FishLoc fishLoc = fishLocs.getValue(FishLoc.class);
                     Log.d("maggiDB", "Value is: " + dataSnapshot.getChildrenCount());
@@ -145,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         });
-        /*
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -159,43 +158,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapClick(LatLng latLng) {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
-        });*/
+        });
 
         setLocationEnabled();
         setDefaultUiSettings();
-
+        gMap.setOnMapLongClickListener(this);
     }
 
-        //Updates bottom sheet text views with info from marker and shows the bottom sheet
-       /* private void updateBottomSheetContent(Marker marker) {
-            TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
-            TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
-            title.setText(marker.getTitle());
-            snippet.setText(marker.getSnippet());
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }*/
-
-
-        //gMap.setInfoWindowAdapter(new MyInfoWindow(this));
-        /*gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-                                      @Override
-                                      public View getInfoWindow(Marker marker) {
-                                          View view = rentClusterManager.getMarkerManager().getInfoWindow(marker);
-                                          if (view == null)
-                                              view = saleClusterManager.getMarkerManager().getInfoWindow(marker);
-                                          return view;
-                                      }
-
-                                      @Override
-                                      public View getInfoContents(Marker marker) {
-                                          return null;
-                                      }
-                                  });*/
-
-
-
-
-
+    //Updates bottom sheet text views with info from marker and shows the bottom sheet
+    private void updateBottomSheetContent(Marker marker) {
+        TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
+        TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
+        title.setText(marker.getTitle());
+        snippet.setText(marker.getSnippet());
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
 
     private void setDefaultUiSettings() {
         UiSettings uiSettings = gMap.getUiSettings();
@@ -206,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     //Sjekker om bruker har gitt lokasjons permission, ber om permission om det ikke er gitt.
-    @SuppressLint("MissingPermission")
     @AfterPermissionGranted(LOCATION_PERMISSION)
     private void setLocationEnabled() {
 
@@ -223,12 +199,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        Context context = getApplicationContext();
-        CharSequence text = "Hello toast!";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
         startActivity(new Intent(this, RegisterActivity.class)
                 .putExtra("LatLng", latLng));
     }
@@ -237,9 +207,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /*
     protected void onResume() {
         super.onResume();
-
         ArrayList<FishLoc> locList = FishLoc.getFishLocList();
-
         for (int i = 0; i < locList.size(); i++){
             Log.v("Maggi main", "verdi :"+ locList.get(i));
             //gMap.addMarker(new MarkerOptions().position(locList.get(i).getLoc())

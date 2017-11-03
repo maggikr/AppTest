@@ -32,12 +32,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        if(getIntent().hasExtra("LatLng")){
-            LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
-            coords = (EditText) findViewById(R.id.locText);
-            coords.setText(latLng.latitude +", "+latLng.longitude);
-        }
 
+        LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
+        coords = (EditText) findViewById(R.id.locText);
+
+        coords.setText(latLng.latitude +", "+latLng.longitude);
     }
 
     public void onClickRegister(View view){
@@ -55,7 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
         Double lng = Double.parseDouble(splitCoords[1]);
         FishLoc testLoc = new FishLoc(id, fType, lat, lng);
 
-            myRef.child("fishLocations").child(id).setValue(testLoc);
+        myRef.child("fishLocations").child(id).setValue(testLoc);
 
 
         Log.v("LoggMaggi 1",id +", "+ fType +", "+  splitCoords[0] + splitCoords[1]);
