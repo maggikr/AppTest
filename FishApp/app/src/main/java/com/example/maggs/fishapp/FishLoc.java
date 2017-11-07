@@ -21,14 +21,13 @@ public class FishLoc {
         this.lat = lat;
         this.lng = lng;
         fishLocList.add(this);
-
-       // Log.v("LoggMaggi 0", arrLoc.get(0).id);
     }
 
-    public FishLoc(){
+    public FishLoc(){                                                                   //Constructor without parameter, needed to create objects from datasnapshot
 
     }
 
+        /** Getters and setters **/
     public String getId() {
         return id;
     }

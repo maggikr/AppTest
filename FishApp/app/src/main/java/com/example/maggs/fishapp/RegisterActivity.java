@@ -11,45 +11,37 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class RegisterActivity extends AppCompatActivity {
-    EditText coords;
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference();
+    private EditText coords;
+    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations"); //Connects to firebase and returns stored data under "fishLocations"
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final String TAG = "FISHLOC MESSAGE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        Toolbar toolbar = findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
+        Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
+        setSupportActionBar(toolbar);                                                   //
 
-        ActionBar ab = getSupportActionBar();
+        ActionBar ab = getSupportActionBar();                                           //Enables Up button
         ab.setDisplayHomeAsUpEnabled(true);
-        if(getIntent().hasExtra("LatLng")){
+
+        if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to edittext field
             LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
             coords = (EditText) findViewById(R.id.locText);
             coords.setText(latLng.latitude +", "+latLng.longitude);
         }
-
     }
 
-    public void onClickRegister(View view){
+
+    public void onClickRegister(View view){                                             //Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity
         EditText idText = (EditText) findViewById(R.id.idText);
         String id = idText.getText().toString();
 
@@ -59,32 +51,31 @@ public class RegisterActivity extends AppCompatActivity {
         String[] splitCoords;
         splitCoords = coords.getText().toString().split(",");
 
-        //LatLng loc = new LatLng(Double.parseDouble(splitCoords[0]),Double.parseDouble(splitCoords[1]));
         Double lat = Double.parseDouble(splitCoords[0]);
         Double lng = Double.parseDouble(splitCoords[1]);
         FishLoc testLoc = new FishLoc(id, fType, lat, lng);
 
         myRef.child("fishLocations").child(id).setValue(testLoc);
 
-
-        Log.v("LoggMaggi 1",id +", "+ fType +", "+  splitCoords[0] + splitCoords[1]);
-        Log.v("LoggMaggi 2","verdi :"+ FishLoc.getFishLocList().get(0).getFishType());
         startActivity(new Intent(this, MainActivity.class));
-
     }
+
+
     public void onClickGetImage(View view){
         dispatchTakePictureIntent();
     }
 
-    private void dispatchTakePictureIntent() {
+
+    private void dispatchTakePictureIntent() {                                          //Opens camera app
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
 
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {     //If image is chosen a bitmap version is loaded into image view
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
@@ -92,5 +83,4 @@ public class RegisterActivity extends AppCompatActivity {
             fishImg.setImageBitmap(imageBitmap);
         }
     }
-
 }
