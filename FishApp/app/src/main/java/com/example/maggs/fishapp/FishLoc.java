@@ -1,8 +1,5 @@
 package com.example.maggs.fishapp;
 
-import android.util.Log;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
