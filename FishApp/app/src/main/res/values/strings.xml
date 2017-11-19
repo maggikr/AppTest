@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FishApp</string>
+    <string name="app_name">FishLoc</string>
     <string name="text_welcome_message">Welcome to Android Tutorials Hub</string>
     <string name="text_dialog_bottom_sheet">Dialog Bottom Sheet</string>
     <string name="text_expand_me">Expand Me</string>
