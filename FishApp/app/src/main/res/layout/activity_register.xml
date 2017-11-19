@@ -12,33 +12,52 @@
         layout="@layout/toolbar"/>
 
     <EditText
-        android:id="@+id/idText"
+        android:id="@+id/fishTypeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/main_toolbar"
         android:layout_marginLeft="16dp"
         android:ems="10"
-        android:hint="ID" />
+        android:hint="Fish type" />
 
     <EditText
-        android:id="@+id/fishTypeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/idText"
-        android:layout_marginLeft="16dp"
-        android:ems="10"
-        android:hint="Fish type"
-        android:inputType="textPersonName" />
-
-    <EditText
-        android:id="@+id/locText"
+        android:id="@+id/baitText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/fishTypeText"
         android:layout_marginLeft="16dp"
         android:ems="10"
-        android:hint="location"
-        android:inputType="textPersonName" />
+        android:hint="Agn" />
+
+    <EditText
+        android:id="@+id/locText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/baitText"
+        android:layout_marginLeft="16dp"
+        android:ems="10"
+        android:hint="Lokasjon" />
+
+    <EditText
+        android:id="@+id/timeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/locText"
+        android:layout_marginLeft="16dp"
+        android:ems="10"
+        android:hint="Tid"
+         />
+
+    <EditText
+        android:id="@+id/commentText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timeText"
+        android:layout_marginLeft="16dp"
+        android:ems="10"
+        android:hint="Kommentar"
+        android:minLines="3"
+        />
 
     <Button
         android:id="@+id/registerBtn"
@@ -55,7 +74,7 @@
         android:layout_width="100dp"
         android:layout_height="150dp"
         android:layout_below="@+id/main_toolbar"
-        android:layout_toRightOf="@+id/idText" />
+        android:layout_toRightOf="@+id/baitText" />
 
     <Button
         android:id="@+id/imgBtn"

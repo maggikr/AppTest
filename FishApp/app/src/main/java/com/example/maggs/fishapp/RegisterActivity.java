@@ -45,20 +45,27 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     public void onClickRegister(View view){                                             //Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity
-        EditText idText = (EditText) findViewById(R.id.idText);
-        String id = idText.getText().toString();
-
         EditText fTypeText = findViewById(R.id.fishTypeText);
         String fType = fTypeText.getText().toString();
+
+        EditText baitText = (EditText) findViewById(R.id.baitText);
+        String bait = baitText.getText().toString();
+
+        EditText timeText = (EditText) findViewById(R.id.timeText);
+        String time = timeText.getText().toString();
+        String id = time;
+
+        EditText commentText = (EditText) findViewById(R.id.commentText);
+        String comment = commentText.getText().toString();
 
         String[] splitCoords;
         splitCoords = coords.getText().toString().split(",");
 
         Double lat = Double.parseDouble(splitCoords[0]);
         Double lng = Double.parseDouble(splitCoords[1]);
-        FishLoc testLoc = new FishLoc(id, fType, lat, lng);
+        FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
 
-        myRef.child("fishLocations").child(id).setValue(testLoc);
+        myRef.child(id).setValue(testLoc);
 
         startActivity(new Intent(this, MainActivity.class));
     }

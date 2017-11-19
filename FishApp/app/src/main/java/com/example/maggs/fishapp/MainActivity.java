@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d(TAG, "Value is: " + dataSnapshot.getChildrenCount());
                     gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
                             .title(fishLoc.getFishType())
-                            .snippet("ID: " + fishLoc.getId()));
+                            .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment()));
                 }
             }
 
