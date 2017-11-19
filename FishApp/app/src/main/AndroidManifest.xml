@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"> // Fjerner standard topbar
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"> // Removes standard actionbar
 
         <activity android:name=".MainActivity">
             <intent-filter>

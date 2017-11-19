@@ -2,7 +2,9 @@ package com.example.maggs.fishapp;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         ActionBar ab = getSupportActionBar();                                           //Enables Up button
         ab.setDisplayHomeAsUpEnabled(true);
+
 
         if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to edittext field
             LatLng latLng = getIntent().getExtras().getParcelable("LatLng");

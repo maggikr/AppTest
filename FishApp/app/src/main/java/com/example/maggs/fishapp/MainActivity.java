@@ -2,8 +2,10 @@ package com.example.maggs.fishapp;
 
 import android.Manifest;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -63,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
         setSupportActionBar(toolbar);                                                   //
+
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_menu_white_24dp);
+        toolbar.setOverflowIcon(drawable);
 
         bottomSheet = findViewById(R.id.bottom_sheet);                                  //
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);                    //
