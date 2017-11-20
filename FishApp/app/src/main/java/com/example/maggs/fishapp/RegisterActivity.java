@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
@@ -18,9 +19,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -33,6 +40,8 @@ public class RegisterActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final String TAG = "FISHLOC MESSAGE";
+    private ImageView fishImg;
+    private String id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         EditText timeText = (EditText) findViewById(R.id.timeText);
         String time = timeText.getText().toString();
-        String id = time;
+        id = time;
 
         EditText commentText = (EditText) findViewById(R.id.commentText);
         String comment = commentText.getText().toString();
@@ -74,12 +83,47 @@ public class RegisterActivity extends AppCompatActivity {
         Double lat = Double.parseDouble(splitCoords[0]);
         Double lng = Double.parseDouble(splitCoords[1]);
         FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
-
+        storeImage();
         myRef.child(id).setValue(testLoc);
 
         startActivity(new Intent(this, MainActivity.class));
     }
+    public void storeImage(){
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference().child(id + ".jpg");;
+        /*
+        // Create a reference to "mountains.jpg"
+        StorageReference mountainsRef = storageRef.child();
 
+        // Create a reference to 'images/mountains.jpg'
+        StorageReference mountainImagesRef = storageRef.child("images/mountains.jpg");
+
+        // While the file names are the same, the references point to different files
+        mountainsRef.getName().equals(mountainImagesRef.getName());    // true
+        mountainsRef.getPath().equals(mountainImagesRef.getPath());    // false
+        */
+        fishImg.setDrawingCacheEnabled(true);
+        fishImg.buildDrawingCache();
+        Bitmap bitmap = fishImg.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = storageRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.v(TAG, "Image upload failed");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.v(TAG, "Image upload successful");
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            }
+        });
+    }
 
     public void onClickGetImage(View view){
         dispatchTakePictureIntent();
@@ -91,7 +135,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
-    }
+    }*/
 
 
     @Override
@@ -100,10 +144,10 @@ public class RegisterActivity extends AppCompatActivity {
             /*Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             ImageView fishImg = (ImageView) findViewById(R.id.fishImg);
-            fishImg.setImageBitmap(imageBitmap);
+            fishImg.setImageBitmap(imageBitmap);*/
             setPic();
         }
-    }*/
+    }
     String mCurrentPhotoPath;
 
     private File createImageFile() throws IOException {
@@ -145,7 +189,8 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
     private void setPic() {
-        ImageView fishImg = (ImageView) findViewById(R.id.fishImg);
+        fishImg = (ImageView) findViewById(R.id.fishImg);
+
         // Get the dimensions of the View
         int targetW = fishImg.getWidth();
         int targetH = fishImg.getHeight();
@@ -166,6 +211,7 @@ public class RegisterActivity extends AppCompatActivity {
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        fishImg.setScaleType(ImageView.ScaleType.FIT_XY);
         fishImg.setImageBitmap(bitmap);
     }
 }

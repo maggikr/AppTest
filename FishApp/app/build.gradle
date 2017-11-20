@@ -35,6 +35,11 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'pub.devrel:easypermissions:1.0.1'
     compile 'com.android.support:design:26.1.0'
+    compile 'com.google.firebase:firebase-storage:11.6.0'
+    // FirebaseUI Storage which requires glide library
+    compile 'com.firebaseui:firebase-ui-storage:3.1.0'
+    compile 'com.github.bumptech.glide:glide:4.1.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
 }
 
 

@@ -108,6 +108,6 @@ public class FishLoc {
 
     @Override
     public String toString() {
-        return "ID: "+ id + " Fish: "+ fishType + " lat: " + lat.toString() + " lng: "+ lng.toString();
+        return "Dato: "+ id + " Fish: "+ fishType + " lat: " + lat.toString() + " lng: "+ lng.toString();
     }
 }

@@ -12,9 +12,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -39,6 +42,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
@@ -176,7 +181,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d(TAG, "Value is: " + dataSnapshot.getChildrenCount());
                     gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
                             .title(fishLoc.getFishType())
-                            .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment()));
+                            .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment()))
+                            .setTag(fishLoc.getId());
                 }
             }
 
@@ -211,6 +217,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void updateBottomSheetContent(Marker marker) {                              //Updates bottom sheet text views with info from marker and displays the bottom sheet
+        /*FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+
+        // Create a reference with an initial file path and name
+        StorageReference pathReference = storageRef.child("mountains.jpg");
+
+        // Create a reference to a file from a Google Cloud Storage URI
+        StorageReference gsReference = storage.getReferenceFromUrl("gs://fishapp-ee352.appspot.com/");
+        StorageReference urlChild = gsReference.child("mountains.jpg");
+        // Create a reference from an HTTPS URL
+        // Note that in the URL, characters are URL escaped!
+        StorageReference httpsReference = storage.getReferenceFromUrl("https://firebasestorage.googleapis.com/b/bucket/o/images%20stars.jpg");
+
+        // Reference to an image file in Firebase Storage
+        StorageReference storageReference ;*/
+        FirebaseStorage mFirebaseStorage = FirebaseStorage.getInstance();
+        StorageReference mStorageRef = mFirebaseStorage.getReferenceFromUrl("gs://fishapp-ee352.appspot.com");
+        StorageReference urlChild = mStorageRef.child(marker.getTag()+".jpg");
+
+        // ImageView in your Activity
+                ImageView imageView = (ImageView) bottomSheet.findViewById(R.id.markerImage);
+
+        // Load the image using Glide
+        GlideApp.with(this /* context */)
+                .load(urlChild)
+                .into(imageView);
         TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
         TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
         title.setText(marker.getTitle());
