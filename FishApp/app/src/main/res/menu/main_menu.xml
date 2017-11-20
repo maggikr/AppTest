@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <item
+        android:id="@+id/item_filter"
+        android:title="Filter"
+        app:showAsAction="ifRoom|collapseActionView"
+        />
+    <item
         android:id="@+id/item_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="Søk"

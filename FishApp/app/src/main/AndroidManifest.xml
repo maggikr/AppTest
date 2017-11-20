@@ -24,8 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MapActivity"
-            android:parentActivityName="com.example.maggs.fishapp.MainActivity"/>
 
         <activity android:name=".LoginActivity"
             android:label="Logg inn"

@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -42,6 +43,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "FISHLOC MESSAGE";
     private ImageView fishImg;
     private String id;
+    private EditText timeText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,11 @@ public class RegisterActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();                                           //Enables Up button
         ab.setDisplayHomeAsUpEnabled(true);
 
+        timeText = (EditText) findViewById(R.id.timeText);
+        Calendar currentTime = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String formattedDate = dateFormat.format(currentTime.getTime());
+        timeText.setText(formattedDate);
 
         if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to edittext field
             LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
@@ -70,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
         EditText baitText = (EditText) findViewById(R.id.baitText);
         String bait = baitText.getText().toString();
 
-        EditText timeText = (EditText) findViewById(R.id.timeText);
+        timeText = (EditText) findViewById(R.id.timeText);
         String time = timeText.getText().toString();
         id = time;
 

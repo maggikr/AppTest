@@ -12,7 +12,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.InputStream;
 
 /**
- * Created by Maggs on 20.11.2017.
+ * Created by Maggs on 20.11.2017. Needed to download images using firebase UI storage
  */
 
 @GlideModule
