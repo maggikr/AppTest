@@ -33,6 +33,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         bottomSheet = findViewById(R.id.bottom_sheet);                                  //
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);                    //
-        bottomSheetBehavior.setPeekHeight(400);                                         //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
+        bottomSheetBehavior.setPeekHeight(450);                                         //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
         bottomSheetBehavior.setHideable(true);                                          //
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);                 //
 
@@ -181,7 +182,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d(TAG, "Value is: " + dataSnapshot.getChildrenCount());
                     gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
                             .title(fishLoc.getFishType())
-                            .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment()))
+                            .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
+                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
                             .setTag(fishLoc.getId());
                 }
             }
