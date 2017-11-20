@@ -55,7 +55,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/path"></meta-data>
+                android:resource="@xml/paths"></meta-data>
         </provider>
 
     </application>
