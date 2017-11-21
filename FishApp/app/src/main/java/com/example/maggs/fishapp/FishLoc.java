@@ -27,7 +27,7 @@ public class FishLoc {
         this.bait = bait;
         this.time = time;
         this.comment = comment;
-        fishTypeList.add(fishType);
+        addFishtype(fishType);
     }
 
     public FishLoc(String id, String fishType, Double lat, Double lng){
@@ -57,7 +57,7 @@ public class FishLoc {
 
     public void setFishType(String fishType) {
         this.fishType = fishType;
-        fishTypeList.add(fishType);
+        addFishtype(fishType);
     }
 
     public Double getLat() {
@@ -114,6 +114,14 @@ public class FishLoc {
 
     public static void setFishTypeList(ArrayList<String> fishTypeList) {
         FishLoc.fishTypeList = fishTypeList;
+    }
+    public static void addFishtype(String fishType){
+        for (String ft : fishTypeList){
+            if(ft.equals(fishType)){
+                return;
+            }
+        }
+        fishTypeList.add(fishType);
     }
 
 

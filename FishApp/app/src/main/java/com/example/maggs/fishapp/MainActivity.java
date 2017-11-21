@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -146,7 +148,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         MenuItem menuItem = menu.findItem(R.id.item_filter);
         subMenu = menuItem.getSubMenu();
         subMenu.clear();
+
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
+        Log.v(TAG, fishTypes.size()+" typer");
         for(int i=0; i<fishTypes.size();i++){
             subMenu.add(1, i, 0, fishTypes.get(i)).setCheckable(true);
         }
@@ -162,6 +166,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {                               //Sets onClick functionality to menu items and search button
 
         switch (item.getItemId()) {
+
+            case 0:
+                item.setChecked(true);
+                Toast.makeText(this,"Feila",Toast.LENGTH_LONG);
+                return false;
+            case 1:
+                return false;
+            case 2:
+                return false;
+            case 3:
+                return false;
+            case 4:
+                return false;
+            case 5:
+                return false;
+            case 6:
+                return false;
 
             case R.id.item_search:
                 onClickSearch();
@@ -186,9 +207,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.item_help:
                 startActivity(new Intent(this, HelpActivity.class));
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+
     }
 
 
@@ -201,7 +224,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title("Marker in Halden"));
         gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
 
+        myRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot fishLocsData, String prevChildKey) {
+                FishLoc fishLoc = fishLocsData.getValue(FishLoc.class);
+                gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
+                        .title(fishLoc.getFishType())
+                        .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
+                        .setTag(fishLoc.getId());
+                        invalidateOptionsMenu();
+            }
 
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        /*
         myRef.addValueEventListener(new ValueEventListener() {                          //Adds database listener, runs at startup and when data is updated
 
             @Override
@@ -223,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
 
-        });
+        });*/
 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {           //Sets marker listener which loads marker data to bottom sheet
             @Override
