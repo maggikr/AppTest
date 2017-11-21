@@ -17,6 +17,7 @@ public class FishLoc {
     private String comment;
 
     private static ArrayList<FishLoc> fishLocList = new ArrayList<>();
+    private static ArrayList<String> fishTypeList = new ArrayList<>();
 
     public FishLoc(String id, String fishType, Double lat, Double lng, String bait, String time, String comment) {
         this.id = id;
@@ -26,6 +27,7 @@ public class FishLoc {
         this.bait = bait;
         this.time = time;
         this.comment = comment;
+        fishTypeList.add(fishType);
     }
 
     public FishLoc(String id, String fishType, Double lat, Double lng){
@@ -55,6 +57,7 @@ public class FishLoc {
 
     public void setFishType(String fishType) {
         this.fishType = fishType;
+        fishTypeList.add(fishType);
     }
 
     public Double getLat() {
@@ -97,7 +100,6 @@ public class FishLoc {
         this.comment = comment;
     }
 
-
     public static ArrayList<FishLoc> getFishLocList() {
         return fishLocList;
     }
@@ -105,6 +107,15 @@ public class FishLoc {
     public static void setFishLocList(ArrayList<FishLoc> fishLocList) {
         FishLoc.fishLocList = fishLocList;
     }
+
+    public static ArrayList<String> getFishTypeList() {
+        return fishTypeList;
+    }
+
+    public static void setFishTypeList(ArrayList<String> fishTypeList) {
+        FishLoc.fishTypeList = fishTypeList;
+    }
+
 
     @Override
     public String toString() {

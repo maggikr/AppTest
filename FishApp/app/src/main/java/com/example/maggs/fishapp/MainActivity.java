@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -51,6 +52,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
     private GoogleMap gMap;                                                             //Will hold google map instance
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String[] locationPermission = {Manifest.permission.ACCESS_FINE_LOCATION};   //
     private static final int LOCATION_PERMISSION = 1;                                   //variables to check permission
     private static final String TAG = "FISHLOC MESSAGE";
+    private SubMenu subMenu;
 
 
     @Override
@@ -129,9 +133,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {                                     //Sets main_menu as actionbar menu
         getMenuInflater().inflate(R.menu.main_menu, menu);
+       /* MenuItem menuItem = menu.findItem(R.id.item_filter);
+        subMenu = menuItem.getSubMenu();
+        subMenu.add(0, 1, 2, "Hei");*/
+        // id is idx+ my constant*/
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem menuItem = menu.findItem(R.id.item_filter);
+        subMenu = menuItem.getSubMenu();
+        subMenu.clear();
+        ArrayList<String> fishTypes = FishLoc.getFishTypeList();
+        for(int i=0; i<fishTypes.size();i++){
+            subMenu.add(1, i, 0, fishTypes.get(i)).setCheckable(true);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+
+
 
 
     @Override
@@ -191,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
                             .setTag(fishLoc.getId());
                 }
+                invalidateOptionsMenu(); //Runs onPrepareOptionsMenu() to add fishtypes to filter button
             }
 
             @Override
@@ -220,6 +245,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         setLocationEnabled();
         setDefaultUiSettings();
+
+
     }
 
 
