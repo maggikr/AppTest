@@ -54,6 +54,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
@@ -70,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int LOCATION_PERMISSION = 1;                                   //variables to check permission
     private static final String TAG = "FISHLOC MESSAGE";
     private SubMenu subMenu;
+    private PopupMenu popupMenu;
+    private ArrayList<String> filterList;
+    private ArrayList<Marker> markerList;
+    private int FILTER_ACTIVATED = 0;
 
 
     @Override
@@ -145,16 +150,76 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem menuItem = menu.findItem(R.id.item_filter);
-        subMenu = menuItem.getSubMenu();
+        /*MenuItem menuItem = menu.findItem(R.id.item_filter);
+        SubMenu subMenu = menuItem.getSubMenu();
         subMenu.clear();
-
+        */
+        filterList = new ArrayList<>();
+        final View menuItemView = findViewById(R.id.item_filter); // SAME ID AS MENU ID
+        popupMenu = new PopupMenu(this, menuItemView);
+        //popupMenu.getMenu().add(0,1,0,"Knapp!");
+        ArrayList<String> fishTypes = FishLoc.getFishTypeList();
+        Log.v(TAG, fishTypes.size()+" typer");
+        for(int i=0; i<fishTypes.size();i++){
+            popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+            filterList.add(fishTypes.get(i));
+            Log.v(TAG, filterList.get(i));
+        }
+        popupMenu.getMenu().add(1, 999, 0, "Filtrer");
+        /*
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
         for(int i=0; i<fishTypes.size();i++){
             subMenu.add(1, i, 0, fishTypes.get(i)).setCheckable(true);
-        }
+        }*/
 
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                item.setChecked(!item.isChecked());
+
+                // Do other stuff
+                if(item.isChecked()){
+                    Log.v(TAG,"Item is checked");
+                    if(filterList.contains(item.getTitle())) {
+
+                    }
+                    else {
+                        filterList.add((String) item.getTitle());
+                    }
+                }
+                else if(!item.isChecked()){
+                    Log.v(TAG,"Item is not checked");
+                    if(filterList.contains(item.getTitle())){
+                        filterList.remove(item.getTitle());
+                    }
+
+                }
+
+
+                if(item.getItemId()==999){
+
+                    FILTER_ACTIVATED = 1;
+                    filterMarkers();
+                }
+                // Keep the popup menu open
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                item.setActionView(new View(getBaseContext()));
+                item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem item) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem item) {
+                        return false;
+                    }
+                });
+                return false;
+            }
+        });
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -167,6 +232,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         switch (item.getItemId()) {
 
+            case R.id.item_filter:
+
+
+                popupMenu.show();
+                return true;
             case 0:
                 item.setChecked(true);
                 Toast.makeText(this,"Feila",Toast.LENGTH_LONG);
@@ -218,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {                                       //Adds markers/functionality to map at startup when loaded
         gMap = googleMap;
-
+        markerList = new ArrayList<>();
         LatLng halden = new LatLng(59.12478, 11.38754);
         gMap.addMarker(new MarkerOptions().position(halden)
                 .title("Marker in Halden"));
@@ -228,12 +298,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onChildAdded(DataSnapshot fishLocsData, String prevChildKey) {
                 FishLoc fishLoc = fishLocsData.getValue(FishLoc.class);
-                gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
+                Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
+                        .title(fishLoc.getFishType())
+                        .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)));
+                /*gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
                         .title(fishLoc.getFishType())
                         .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
-                        .setTag(fishLoc.getId());
-                        invalidateOptionsMenu();
+                        .setTag(fishLoc.getId());*/
+
+                //gMap.addMarker(markerOpt).setTag(fishLoc.getId());
+                marker.setTag(fishLoc.getId());
+                /*if(FILTER_ACTIVATED==1){
+                    if(filterList.contains(fishLoc.getFishType())){
+                        marker.setVisible(true);
+                        markerList.add(marker);
+                    }
+                    else{
+                        marker.setVisible(false);
+                        markerList.add(marker);
+                    }
+                }
+                else {
+                    markerList.add(marker);
+                }*/
+                markerList.add(marker);
+                invalidateOptionsMenu();
             }
 
             @Override
@@ -296,6 +387,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     }
+
+    public void filterMarkers(){
+        //gMap.clear();
+        FILTER_ACTIVATED=1;
+        for(Marker m : markerList){
+            //if(FILTER_ACTIVATED==1){
+                if(filterList.contains(m.getTitle())){
+                    m.setVisible(true);
+
+                }
+                else{
+                    m.setVisible(false);
+                    //Log.v(TAG,"Filtrert" + m.getTitle() + " " + filterList.get(0));
+                }
+
+        }
+    }
+
 
 
     private void updateBottomSheetContent(Marker marker) {                              //Updates bottom sheet text views with info from marker and displays the bottom sheet

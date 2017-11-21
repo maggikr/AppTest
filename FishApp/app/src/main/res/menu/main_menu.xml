@@ -6,9 +6,7 @@
         android:id="@+id/item_filter"
         android:title="Filter"
         app:showAsAction="ifRoom">
-        <menu>
 
-        </menu>
 
     </item>
     <item
