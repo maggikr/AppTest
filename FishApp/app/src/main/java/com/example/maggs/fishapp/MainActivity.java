@@ -79,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int FILTER_ACTIVATED = 0;
     private boolean activityReopened;
     private String newType;
+    private boolean RESTORED;
+    private boolean SKIP;
 
 
 
@@ -111,6 +113,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList("filterlist",filterList);
+        outState.putInt("filter_activated",FILTER_ACTIVATED);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        filterList = savedInstanceState.getStringArrayList("filterlist");
+        FILTER_ACTIVATED = savedInstanceState.getInt("filter_activated");
+        RESTORED = true;
+        SKIP = true;
+
+    }
 
     public void onClickSearch(){                                                        //Opens search/autocomplete field
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
@@ -168,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
         int filters = 0;
+        if(!RESTORED){
         if(FILTER_ACTIVATED==1){
             for(int i=0; i<fishTypes.size();i++){
                 //if(f)
@@ -175,8 +194,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
                 }
                 else if(fishTypes.get(i).equals(newType)){
-                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                    filterList.add(fishTypes.get(i));
+                    if(!SKIP){
+                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                        filterList.add(fishTypes.get(i));
+                    }
+                    else{
+                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
+                        SKIP = false;
+                    }
+
                 }
                 else{
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
@@ -196,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 Log.v(TAG, filterList.get(i)+"Added to filter");
             }
+        }
         }
 
         popupMenu.getMenu().add(1, 999, 0, "Filtrer");
@@ -367,8 +394,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     markerList.add(marker);
                 }*/
                 markerList.add(marker);
+
                 if(FILTER_ACTIVATED==1){
-                    newType = fishLoc.getFishType();
+
+                        newType = fishLoc.getFishType();
+
                     filterMarkers();
                 }
                 invalidateOptionsMenu();
@@ -437,20 +467,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void filterMarkers(){
         //gMap.clear();
-        FILTER_ACTIVATED=1;
-        for(Marker m : markerList){
-            //if(FILTER_ACTIVATED==1){
-                if(filterList.contains(m.getTitle())){
-                    Log.v(TAG,m.getTitle()+" is visible");
-                    m.setVisible(true);
+        if(!RESTORED){
+            FILTER_ACTIVATED=1;
+            for(Marker m : markerList){
+                //if(FILTER_ACTIVATED==1){
+                    if(filterList.contains(m.getTitle())){
+                        Log.v(TAG,m.getTitle()+" is visible");
+                        m.setVisible(true);
 
-                }
-                else{
-                    m.setVisible(false);
-                    //Log.v(TAG,"Filtrert" + m.getTitle() + " " + filterList.get(0));
-                }
+                    }
+                    else{
+                        m.setVisible(false);
+                        //Log.v(TAG,"Filtrert" + m.getTitle() + " " + filterList.get(0));
+                    }
 
+            }
         }
+        RESTORED = false;
     }
 
 
