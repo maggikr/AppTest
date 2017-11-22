@@ -17,7 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"> // Removes standard actionbar
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTop">                        //Prevents mainActivity from reloading on resume
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

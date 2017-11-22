@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -55,10 +56,10 @@ public class RegisterActivity extends AppCompatActivity {
 
         ActionBar ab = getSupportActionBar();                                           //Enables Up button
         ab.setDisplayHomeAsUpEnabled(true);
-
+        fishImg = (ImageView) findViewById(R.id.fishImg);
         timeText = (EditText) findViewById(R.id.timeText);
         Calendar currentTime = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         String formattedDate = dateFormat.format(currentTime.getTime());
         timeText.setText(formattedDate);
 
@@ -79,7 +80,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         timeText = (EditText) findViewById(R.id.timeText);
         String time = timeText.getText().toString();
-        id = time;
+
+
+
 
         EditText commentText = (EditText) findViewById(R.id.commentText);
         String comment = commentText.getText().toString();
@@ -90,10 +93,20 @@ public class RegisterActivity extends AppCompatActivity {
         Double lat = Double.parseDouble(splitCoords[0]);
         Double lng = Double.parseDouble(splitCoords[1]);
         FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
-        storeImage();
+        if(fishImg.getDrawable() != null){
+            Log.v(TAG,"Bilde finnes");
+            storeImage();
+
+        }
+
+        Random rand = new Random();
+        int n = rand.nextInt(9999999);
+        id = time + n;
         myRef.child(id).setValue(testLoc);
 
-        startActivity(new Intent(this, MainActivity.class));
+        finishActivity(0);
+        finish();
+        //startActivity(new Intent(this, MainActivity.class));
     }
     public void storeImage(){
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -196,7 +209,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
     private void setPic() {
-        fishImg = (ImageView) findViewById(R.id.fishImg);
 
         // Get the dimensions of the View
         int targetW = fishImg.getWidth();

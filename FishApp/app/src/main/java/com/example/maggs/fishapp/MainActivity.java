@@ -75,27 +75,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<String> filterList;
     private ArrayList<Marker> markerList;
     private int FILTER_ACTIVATED = 0;
+    private boolean activityReopened;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        //if (!activityReopened) {
+            setContentView(R.layout.activity_main);
+            // Run what do you want to do only once.
+            MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
 
-        Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
-        setSupportActionBar(toolbar);                                                   //
+            Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
+            setSupportActionBar(toolbar);                                                   //
+            filterList = new ArrayList<>();
+            Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_menu_white_24dp);
+            toolbar.setOverflowIcon(drawable);
 
-        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_menu_white_24dp);
-        toolbar.setOverflowIcon(drawable);
+            bottomSheet = findViewById(R.id.bottom_sheet);                                  //
+            bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);                    //
+            bottomSheetBehavior.setPeekHeight(450);                                         //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
+            bottomSheetBehavior.setHideable(true);                                          //
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            // To avoid onCreate() if it will be called a second time,
+            // so put the boolean to true
+            activityReopened = true;
+            Log.v(TAG,"KJØRT ON CREATE!");
+        //}
 
-        bottomSheet = findViewById(R.id.bottom_sheet);                                  //
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);                    //
-        bottomSheetBehavior.setPeekHeight(450);                                         //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
-        bottomSheetBehavior.setHideable(true);                                          //
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);                 //
+
+                      //
 
     }
 
@@ -123,8 +134,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
-                gMap.addMarker(new MarkerOptions().position(place.getLatLng())
-                        .title("here!"));
+                /*gMap.addMarker(new MarkerOptions().position(place.getLatLng())
+                        .title("here!"));*/
                 gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(place.getLatLng(), 15, 0, 0)));
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
@@ -145,6 +156,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         subMenu.add(0, 1, 2, "Hei");*/
         // id is idx+ my constant*/
 
+        final View menuItemView = findViewById(R.id.item_filter); // SAME ID AS MENU ID
+        popupMenu = new PopupMenu(this, menuItemView);
+        //popupMenu.getMenu().add(0,1,0,"Knapp!");
+        ArrayList<String> fishTypes = FishLoc.getFishTypeList();
+        Log.v(TAG, fishTypes.size()+" typer");
+        if(FILTER_ACTIVATED==1){
+            for(int i=0; i<fishTypes.size();i++){
+                if(filterList.contains(fishTypes.get(i))){
+                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                }
+                else{
+                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
+                }
+                //filterList.add(fishTypes.get(i));
+                //Log.v(TAG, filterList.get(i));
+            }
+        }
+        else{
+            for(int i=0; i<fishTypes.size();i++){
+                popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                filterList.add(fishTypes.get(i));
+                Log.v(TAG, filterList.get(i)+"Added to filter");
+            }
+        }
+
+        popupMenu.getMenu().add(1, 999, 0, "Filtrer");
         return true;
     }
 
@@ -154,18 +191,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SubMenu subMenu = menuItem.getSubMenu();
         subMenu.clear();
         */
-        filterList = new ArrayList<>();
-        final View menuItemView = findViewById(R.id.item_filter); // SAME ID AS MENU ID
-        popupMenu = new PopupMenu(this, menuItemView);
-        //popupMenu.getMenu().add(0,1,0,"Knapp!");
-        ArrayList<String> fishTypes = FishLoc.getFishTypeList();
-        Log.v(TAG, fishTypes.size()+" typer");
-        for(int i=0; i<fishTypes.size();i++){
-            popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-            filterList.add(fishTypes.get(i));
-            Log.v(TAG, filterList.get(i));
-        }
-        popupMenu.getMenu().add(1, 999, 0, "Filtrer");
+
         /*
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
@@ -233,8 +259,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()) {
 
             case R.id.item_filter:
-
-
                 popupMenu.show();
                 return true;
             case 0:
@@ -290,8 +314,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         gMap = googleMap;
         markerList = new ArrayList<>();
         LatLng halden = new LatLng(59.12478, 11.38754);
-        gMap.addMarker(new MarkerOptions().position(halden)
-                .title("Marker in Halden"));
+        /*gMap.addMarker(new MarkerOptions().position(halden)
+                .title("Marker in Halden"));*/
         gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
 
         myRef.addChildEventListener(new ChildEventListener() {
@@ -307,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
                         .setTag(fishLoc.getId());*/
+                Log.v(TAG, "Mark added");
 
                 //gMap.addMarker(markerOpt).setTag(fishLoc.getId());
                 marker.setTag(fishLoc.getId());
@@ -324,6 +349,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     markerList.add(marker);
                 }*/
                 markerList.add(marker);
+                if(FILTER_ACTIVATED==1){
+                    filterMarkers();
+                }
                 invalidateOptionsMenu();
             }
 
@@ -394,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for(Marker m : markerList){
             //if(FILTER_ACTIVATED==1){
                 if(filterList.contains(m.getTitle())){
+                    Log.v(TAG,m.getTitle()+" is visible");
                     m.setVisible(true);
 
                 }
@@ -466,7 +495,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapLongClick(LatLng latLng) {                                         //Starts registerActivity on long clicks and brings latlng
-        startActivity(new Intent(this, RegisterActivity.class)
-                .putExtra("LatLng", latLng));
+        startActivityForResult(new Intent(this, RegisterActivity.class)
+                .putExtra("LatLng", latLng),0);
+    }
+
+    @Override
+    protected void onResume() {
+        //activityReopened = true;
+        //invalidateOptionsMenu();
+        super.onResume();
     }
 }
