@@ -59,15 +59,7 @@
         android:minLines="3"
         />
 
-    <Button
-        android:id="@+id/registerBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="110dp"
-        android:text="Registrer"
-        android:onClick="onClickRegister"/>
+
 
     <ImageView
         android:id="@+id/fishImg"
@@ -87,6 +79,13 @@
         android:layout_alignParentRight="true"
         android:text="Add image"
         android:onClick="onClickGetImage"/>
-
+    <Button
+        android:id="@+id/registerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Registrer"
+        android:onClick="onClickRegister"/>
 
 </RelativeLayout>

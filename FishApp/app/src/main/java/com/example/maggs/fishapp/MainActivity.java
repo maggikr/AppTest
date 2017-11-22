@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<Marker> markerList;
     private int FILTER_ACTIVATED = 0;
     private boolean activityReopened;
+    private String newType;
+
 
 
     @Override
@@ -165,22 +167,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //popupMenu.getMenu().add(0,1,0,"Knapp!");
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
+        int filters = 0;
         if(FILTER_ACTIVATED==1){
             for(int i=0; i<fishTypes.size();i++){
+                //if(f)
                 if(filterList.contains(fishTypes.get(i))){
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                }
+                else if(fishTypes.get(i).equals(newType)){
+                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                    filterList.add(fishTypes.get(i));
                 }
                 else{
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
                 }
+                filters++;
                 //filterList.add(fishTypes.get(i));
-                //Log.v(TAG, filterList.get(i));
+                Log.v(TAG, "antall filter: " +filters + "antall typer:"+ FishLoc.getFishTypeList().size()+" "+ newType);
             }
+            filterMarkers();
         }
         else{
             for(int i=0; i<fishTypes.size();i++){
+                filters++;
                 popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                filterList.add(fishTypes.get(i));
+                if(!filterList.contains(fishTypes.get(i))){
+                    filterList.add(fishTypes.get(i));
+                }
                 Log.v(TAG, filterList.get(i)+"Added to filter");
             }
         }
@@ -326,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onChildAdded(DataSnapshot fishLocsData, String prevChildKey) {
                 FishLoc fishLoc = fishLocsData.getValue(FishLoc.class);
+
                 Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
                         .title(fishLoc.getFishType())
                         .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
@@ -354,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }*/
                 markerList.add(marker);
                 if(FILTER_ACTIVATED==1){
+                    newType = fishLoc.getFishType();
                     filterMarkers();
                 }
                 invalidateOptionsMenu();

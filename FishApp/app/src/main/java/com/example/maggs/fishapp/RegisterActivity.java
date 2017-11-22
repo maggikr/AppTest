@@ -92,6 +92,10 @@ public class RegisterActivity extends AppCompatActivity {
 
         Double lat = Double.parseDouble(splitCoords[0]);
         Double lng = Double.parseDouble(splitCoords[1]);
+
+        Random rand = new Random();
+        int n = rand.nextInt(9999999);
+        id = time + n;
         FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
         if(fishImg.getDrawable() != null){
             Log.v(TAG,"Bilde finnes");
@@ -99,9 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         }
 
-        Random rand = new Random();
-        int n = rand.nextInt(9999999);
-        id = time + n;
+
         myRef.child(id).setValue(testLoc);
 
         finishActivity(0);
