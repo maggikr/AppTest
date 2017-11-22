@@ -25,6 +25,7 @@ import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -56,6 +57,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
@@ -103,18 +105,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // so put the boolean to true
             activityReopened = true;
             Log.v(TAG,"KJØRT ON CREATE!");
-        //}
 
-
-                      //
 
     }
 
 
     public void onClickSearch(){                                                        //Opens search/autocomplete field
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setCountry("NO")
+                .build();
+
         try {
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            .setFilter(typeFilter)
                             .build(this);
             startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
         } catch (GooglePlayServicesRepairableException e) {                             //Displays an error dialog informing the user that google play services are not installed or up to date
@@ -263,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             case 0:
                 item.setChecked(true);
-                Toast.makeText(this,"Feila",Toast.LENGTH_LONG);
+
                 return false;
             case 1:
                 return false;
