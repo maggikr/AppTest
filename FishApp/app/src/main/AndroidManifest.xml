@@ -42,6 +42,7 @@
             android:parentActivityName="com.example.maggs.fishapp.MainActivity"/>
 
         <activity android:name=".HelpActivity"
+            android:label="Hjelp"
             android:parentActivityName="com.example.maggs.fishapp.MainActivity">
         </activity>
 

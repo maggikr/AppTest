@@ -1,9 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.maggs.fishapp.HelpActivity">
+    tools:context="com.example.maggs.fishapp.HelpActivity"
+    android:background="@color/colorLight">
+    <include
+        android:id="@+id/main_toolbar"
+        layout="@layout/toolbar"/>
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/helpTitle1_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/main_toolbar"
+        android:layout_margin="5dp"
+        android:fontFamily="serif"
+        android:text="Registrering av lokasjon"
+        android:textSize="18sp"
+        android:textColor="@color/colorPrimaryDark"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/help1_text"
+        android:layout_margin="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/helpTitle1_text"
+        android:textColor="@color/colorPrimaryDark"
+        android:text="Trykk på meny i høyre hjørne > Registrer lokasjon ELLER trykk og hold det stedet på kartet du vil registrere ny lokasjon " />
+
+    <TextView
+        android:id="@+id/helpTitle2_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/colorPrimaryDark"
+        android:layout_below="@+id/help1_text"
+        android:layout_margin="5dp"
+        android:fontFamily="serif"
+        android:text="Filter"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/help2_text"
+        android:layout_margin="5dp"
+        android:layout_width="220sp"
+        android:textColor="@color/colorPrimaryDark"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/helpTitle2_text"
+        android:text="Trykk på Pin ikonet til høyre for forstørrelsesglasset for å åpne filtreringsmenyen. Huk av for de du vil se i kartet, trykk på 'Filtrer' for å utføre filtrering." />
+
+    <ImageView
+        android:id="@+id/instruction_image"
+        android:layout_width="120dp"
+        android:layout_height="200dp"
+        android:layout_margin="5dp"
+        android:layout_toRightOf="@+id/help2_text"
+        android:layout_below="@+id/help1_text"
+        android:background="@drawable/instructions" />
+
+</RelativeLayout>
