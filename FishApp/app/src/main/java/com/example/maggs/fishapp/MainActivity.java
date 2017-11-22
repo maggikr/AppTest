@@ -54,6 +54,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -417,8 +418,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setLocationEnabled();
         setDefaultUiSettings();
 
-
     }
+
 
     public void filterMarkers(){
         //gMap.clear();
@@ -437,7 +438,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
-
 
 
     private void updateBottomSheetContent(Marker marker) {                              //Updates bottom sheet text views with info from marker and displays the bottom sheet
