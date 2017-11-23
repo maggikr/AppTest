@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -349,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {                                       //Adds markers/functionality to map at startup when loaded
         gMap = googleMap;
         markerList = new ArrayList<>();
+
         LatLng halden = new LatLng(59.12478, 11.38754);
         /*gMap.addMarker(new MarkerOptions().position(halden)
                 .title("Marker in Halden"));*/
@@ -532,16 +534,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    @AfterPermissionGranted(LOCATION_PERMISSION)                                        //Runs permission check, requests permission if not yet granted
-    private void setLocationEnabled() {
 
-        if (EasyPermissions.hasPermissions(this, locationPermission)) {
-            gMap.setMyLocationEnabled(true);
-        } else {
-            EasyPermissions.requestPermissions(this, getString(R.string.no_location_permission),
-                    LOCATION_PERMISSION, locationPermission);
-        }
-    }
 
 
     @Override
@@ -590,4 +583,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SKIP = true;
 
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+    @AfterPermissionGranted(LOCATION_PERMISSION)                                        //Runs permission check, requests permission if not yet granted
+    private void setLocationEnabled() {
+
+        if (EasyPermissions.hasPermissions(this, locationPermission)) {
+            gMap.setMyLocationEnabled(true);
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.no_location_permission),
+                    LOCATION_PERMISSION, locationPermission);
+        }
+    }
+
+
+
 }

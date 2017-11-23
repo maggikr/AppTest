@@ -34,6 +34,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import android.Manifest;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -45,6 +49,8 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageView fishImg;
     private String id;
     private EditText timeText;
+    private static final int CAMERA_PERMISSION = 1;
+    private String[] cameraPermission = {Manifest.permission.CAMERA};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,9 +152,19 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
+                                         //Runs permission check, requests permission if not yet granted
+    public void onClickGetImage(View view) {
+        testMethod();
 
-    public void onClickGetImage(View view){
-        dispatchTakePictureIntent();
+    }
+    @AfterPermissionGranted(CAMERA_PERMISSION)
+    private void testMethod(){
+        if (EasyPermissions.hasPermissions(this, cameraPermission)) {
+            dispatchTakePictureIntent();
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.no_camera_permission),
+                    CAMERA_PERMISSION, cameraPermission);
+        }
     }
 
 /*
@@ -235,4 +251,21 @@ public class RegisterActivity extends AppCompatActivity {
         fishImg.setScaleType(ImageView.ScaleType.FIT_XY);
         fishImg.setImageBitmap(bitmap);
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+    /*@AfterPermissionGranted(RC_CAMERA)                                        //Runs permission check, requests permission if not yet granted
+    private void setLocationEnabled() {
+
+        if (EasyPermissions.hasPermissions(this, locationPermission)) {
+
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.no_location_permission),
+                    LOCATION_PERMISSION, locationPermission);
+        }
+    }*/
 }
