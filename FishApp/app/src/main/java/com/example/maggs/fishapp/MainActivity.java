@@ -586,11 +586,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-    @AfterPermissionGranted(LOCATION_PERMISSION)                                        //Runs permission check, requests permission if not yet granted
+    @AfterPermissionGranted(LOCATION_PERMISSION)                                      //Runs permission check, requests permission if not yet granted
     private void setLocationEnabled() {
 
         if (EasyPermissions.hasPermissions(this, locationPermission)) {
