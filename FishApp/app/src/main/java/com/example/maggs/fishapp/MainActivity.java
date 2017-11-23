@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String newType;
     private boolean RESTORED;
     private boolean SKIP;
+    private CameraPosition cp;
+    private LatLng restoredCP;
 
 
 
@@ -113,22 +115,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putStringArrayList("filterlist",filterList);
-        outState.putInt("filter_activated",FILTER_ACTIVATED);
-    }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        filterList = savedInstanceState.getStringArrayList("filterlist");
-        FILTER_ACTIVATED = savedInstanceState.getInt("filter_activated");
-        RESTORED = true;
-        SKIP = true;
-
-    }
 
     public void onClickSearch(){                                                        //Opens search/autocomplete field
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
@@ -360,7 +347,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng halden = new LatLng(59.12478, 11.38754);
         /*gMap.addMarker(new MarkerOptions().position(halden)
                 .title("Marker in Halden"));*/
-        gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
+        if (RESTORED) {
+            gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(restoredCP,15,0,0)));
+            cp = null;
+        }
+        else{
+            gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
+        }
+
 
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -556,5 +550,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //activityReopened = true;
         //invalidateOptionsMenu();
         super.onResume();
+        if (cp != null) {
+            gMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
+            cp = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+
+        Log.v(TAG," SAVING STATE");
+        super.onPause();
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList("filterlist",filterList);
+        outState.putInt("filter_activated",FILTER_ACTIVATED);
+        Log.v(TAG," SAVING STATE");
+        //LatLng cpll = cp.target;
+        cp = gMap.getCameraPosition();
+        outState.putDouble("lat",cp.target.latitude);
+        outState.putDouble("lon",cp.target.longitude);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        filterList = savedInstanceState.getStringArrayList("filterlist");
+        FILTER_ACTIVATED = savedInstanceState.getInt("filter_activated");
+        restoredCP = new LatLng(savedInstanceState.getDouble("lat"),savedInstanceState.getDouble("lon"));
+        Log.v(TAG," RESTORING STATE");
+        RESTORED = true;
+        SKIP = true;
+
     }
 }
