@@ -56,7 +56,7 @@
         android:layout_marginLeft="16dp"
         android:ems="10"
         android:hint="Kommentar"
-        android:minLines="3"
+        android:maxLines="4"
         />
 
 

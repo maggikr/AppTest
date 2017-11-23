@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         popupMenu.getMenu().add(1, 999, 0, "Filtrer");
+        Log.v(TAG, "popup laget");
         return true;
     }
 
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-
+                Log.v(TAG, "onMenuITemClicked");
                 item.setChecked(!item.isChecked());
 
                 // Do other stuff
@@ -290,7 +291,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()) {
 
             case R.id.item_filter:
-                popupMenu.show();
+                Log.v(TAG, "OnOptionsItemSelected");
+                if(FishLoc.getFishTypeList().size()!=0){
+                    popupMenu.show();
+                }
+
                 return true;
             case 0:
                 item.setChecked(true);
