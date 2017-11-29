@@ -56,7 +56,12 @@ public class RegisterActivity extends AppCompatActivity {
     private String id;
     private TextInputEditText timeText;
     private static final int CAMERA_PERMISSION = 1;
+    private TextInputEditText fTypeText;
     private String[] cameraPermission = {Manifest.permission.CAMERA};
+    private boolean timeChecked = false;
+    private boolean fTypeChecked = false;
+    private boolean coordsChecked = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +80,8 @@ public class RegisterActivity extends AppCompatActivity {
         String formattedDate = dateFormat.format(currentTime.getTime());
         timeText.addTextChangedListener(timeWatcher);
         timeText.setText(formattedDate);
+        fTypeText = (TextInputEditText) findViewById(R.id.fishTypeText);
+        fTypeText.addTextChangedListener(fishTypeWatcher);
 
 
         coords = (TextInputEditText) findViewById(R.id.locText);
@@ -87,13 +94,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    /**Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity */
     private final TextWatcher timeWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            timeText.setError("Required");
         }
-
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            //timeText.setVisibility(View.VISIBLE);
+            timeChecked = false;
         }
 
         public void afterTextChanged(Editable s) {
@@ -106,16 +112,19 @@ public class RegisterActivity extends AppCompatActivity {
                 timeText.setError("Only numbers and \"-\"");
                 //timeText.setText("You have entered : " + timeText.getText());
             }
+            else {
+                timeChecked = true;
+            }
         }
     };
 
     private final TextWatcher coordsWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            coords.setError("Required");
+
         }
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            //coords.setVisibility(View.VISIBLE);
+            coordsChecked = false;
         }
 
         public void afterTextChanged(Editable s) {
@@ -125,50 +134,73 @@ public class RegisterActivity extends AppCompatActivity {
                 //timeText.setVisibility(View.GONE);
 
             } else if(!s.toString().matches("[0-9-., ? ]*")){
-                coords.setError("Two numbers divided by .");
+                coords.setError("Two numbers divided by ,");
                 //timeText.setText("You have entered : " + timeText.getText());
+            }
+            else {
+                coordsChecked = true;
             }
         }
     };
-
-
-    public void onClickRegister(View view){                                             //Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity
-        TextInputEditText fTypeText = findViewById(R.id.fishTypeText);
-        String fType = fTypeText.getText().toString();
-
-        TextInputEditText baitText = (TextInputEditText) findViewById(R.id.baitText);
-        String bait = baitText.getText().toString();
-
-        timeText = (TextInputEditText) findViewById(R.id.timeText);
-        String time = timeText.getText().toString();
-
-
-
-
-        EditText commentText = (TextInputEditText) findViewById(R.id.commentText);
-        String comment = commentText.getText().toString();
-
-        String[] splitCoords;
-        splitCoords = coords.getText().toString().split(",");
-
-        Double lat = Double.parseDouble(splitCoords[0]);
-        Double lng = Double.parseDouble(splitCoords[1]);
-
-        Random rand = new Random();
-        int n = rand.nextInt(9999999);
-        id = time + n;
-        FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
-        if(fishImg.getDrawable() != null){
-            Log.v(TAG,"Bilde finnes");
-            storeImage();
+    /**Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity */
+    private final TextWatcher fishTypeWatcher = new TextWatcher() {
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
         }
 
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            fTypeChecked = false;
+        }
 
-        myRef.child(id).setValue(testLoc);
+        public void afterTextChanged(Editable s) {
+            if (s.length() == 0) {
+                fTypeText.setError("Required");
+                //timeText.setVisibility(View.GONE);
 
-        finishActivity(0);
-        finish();
+            } else if(!s.toString().matches("[a-zA-Z? ]*")){
+                fTypeText.setError("Only letters");
+                //timeText.setText("You have entered : " + timeText.getText());
+            }else {
+                fTypeChecked = true;
+            }
+
+        }
+    };
+
+    /**Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity */
+    public void onClickRegister(View view){
+
+        if(fTypeChecked && coordsChecked && timeChecked){
+
+            TextInputEditText baitText = (TextInputEditText) findViewById(R.id.baitText);
+            EditText commentText = (TextInputEditText) findViewById(R.id.commentText);
+
+            String fType = fTypeText.getText().toString();
+            String bait = baitText.getText().toString();
+            String time = timeText.getText().toString();
+            String comment = commentText.getText().toString();
+
+            String[] splitCoords;
+            splitCoords = coords.getText().toString().split(",");
+            Double lat = Double.parseDouble(splitCoords[0]);
+            Double lng = Double.parseDouble(splitCoords[1]);
+
+            Random rand = new Random();
+            int n = rand.nextInt(9999999);
+            id = time + n;
+            FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
+            if(fishImg.getDrawable() != null){
+                Log.v(TAG,"Bilde finnes");
+                storeImage();
+            }
+
+            myRef.child(id).setValue(testLoc);
+
+            finish();
+        }
+        else{
+            Toast.makeText(this,"Please fill out the required fields",Toast.LENGTH_LONG).show();
+        }
         //startActivity(new Intent(this, MainActivity.class));
     }
     public void storeImage(){

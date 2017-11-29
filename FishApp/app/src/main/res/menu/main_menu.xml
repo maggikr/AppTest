@@ -7,27 +7,14 @@
         android:title="Filter"
         android:icon="@drawable/ic_edit_location_white_24dp"
         app:showAsAction="always"/>
-
     <item
         android:id="@+id/item_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="Søk"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
-        android:id="@+id/item_login"
-        android:title="Logg inn"
-        />
-    <item
         android:id="@+id/item_regEvent"
         android:title="Registrer Lokasjon"
-        />
-    <item
-        android:id="@+id/item_profile"
-        android:title="Profil"
-        />
-    <item
-        android:id="@+id/item_settings"
-        android:title="Innstillinger"
         />
     <item
         android:id="@+id/item_help"

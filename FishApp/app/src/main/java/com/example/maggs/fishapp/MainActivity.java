@@ -319,7 +319,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             case 0:
                 item.setChecked(true);
-
                 return false;
             case 1:
                 return false;
@@ -338,20 +337,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 onClickSearch();
                 return true;
 
-            case R.id.item_login:
-                startActivity(new Intent(this, LoginActivity.class));
-                return true;
-
             case R.id.item_regEvent:
                 startActivity(new Intent(this, RegisterActivity.class));
-                return true;
-
-            case R.id.item_profile:
-                startActivity(new Intent(this, ProfileActivity.class));
-                return true;
-
-            case R.id.item_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
 
             case R.id.item_help:
@@ -558,8 +545,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapLongClick(LatLng latLng) {                                         //Starts registerActivity on long clicks and brings latlng
-        startActivityForResult(new Intent(this, RegisterActivity.class)
-                .putExtra("LatLng", latLng),0);
+        startActivity(new Intent(this, RegisterActivity.class)
+                .putExtra("LatLng", latLng));
     }
 
     @Override
