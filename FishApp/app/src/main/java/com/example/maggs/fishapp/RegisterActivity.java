@@ -200,6 +200,7 @@ public class RegisterActivity extends AppCompatActivity {
             //Finishes activity, user returns to MainActivity
             finish();
 
+
         } else{
             Toast.makeText(this,"Please fill out the required fields",Toast.LENGTH_LONG).show();
             fTypeText.setError("Required");

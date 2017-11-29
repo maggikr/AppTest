@@ -11,4 +11,8 @@
     <string name="no_location_permission">Need permission to access your location</string>
     <string name="no_camera_permission">Need permission to access your camera</string>
     <string name="no_network_state_permission">Need permission to access network state</string>
+    <string name="no_location_access">FishLoc can\'t access your location</string>
+    <string name="change_settings">Change settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_network_available">No network detected</string>
 </resources>

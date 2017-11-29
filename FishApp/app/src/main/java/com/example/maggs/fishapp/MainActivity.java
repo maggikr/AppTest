@@ -2,13 +2,15 @@ package com.example.maggs.fishapp;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.provider.Settings;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -17,15 +19,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -41,29 +40,22 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     private GoogleMap gMap;
 
@@ -86,13 +78,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PopupMenu popupMenu;            //filtermenu
     private ArrayList<String> filterList;
     private ArrayList<Marker> markerList;
-    private int FILTER_ACTIVATED = 0;       //Filter activated
+    private int FILTER_ACTIVATED;           //Filter activated
     private boolean RESTORED;               //Activity has been restored
-    private boolean SKIP;                   //Activity has been restored2
     private LatLng restoredCP;              //Stores cameraposition on save state
     private String newType;
-
-
 
 
     @Override
@@ -113,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         toolbar.setOverflowIcon(drawable);
 
         filterList = new ArrayList<>();
+        FILTER_ACTIVATED = 0;
 
         //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
         bottomSheet = findViewById(R.id.bottom_sheet);
@@ -122,18 +112,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         //Check if network is available
-        if(!isNetworkAvailable()){
-            Toast.makeText(this, "No Internet connection detected", Toast.LENGTH_LONG).show();
-        }
-
+        isNetworkAvailable();
     }
 
-    /** Checks if there are any network connections available, returns true/false if network object exists AND is connected */
-    private boolean isNetworkAvailable() {
+    /** Checks if there are any network connections available*/
+    private void isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+
+        //if network object does NOT exists AND is NOT connected informs user width alarm dialog
+        if(!(activeNetworkInfo != null && activeNetworkInfo.isConnected())){
+            AlertDialog.Builder ad = new AlertDialog.Builder(this);
+            ad.setMessage(getResources().getString(R.string.no_network_available));
+
+            //Sets button with onClick function which gives user option to open wireless settings
+            ad.setPositiveButton(getResources().getString(R.string.change_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent( Settings.ACTION_WIRELESS_SETTINGS);
+                    startActivity(myIntent);
+                }
+            });
+            ad.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(getBaseContext(), "Unable to load new data without network access",Toast.LENGTH_LONG).show();
+
+                }
+            });
+            ad.show();
+        }
     }
 
     /** Creates Autocomplete/search field through intent*/
@@ -192,21 +202,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Stores fishtype array from FishLoc into fishTypes array
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
-
+        Log.v(TAG, filterList.size()+" typer");
 
         //IF user has activated filter, iterate through fishtype list
         if (FILTER_ACTIVATED == 1) {
             for (int i = 0; i < fishTypes.size(); i++) {
-
+                Log.v(TAG, "228");
                 //IF the fishtype is the checked in filter, set option checked
                 if (filterList.contains(fishTypes.get(i))) {
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-
-                //IF a new fishtype has been registered since last filter build add new checked filter option to menu and add to filterlist
+                    Log.v(TAG, "232");
+                //IF a new fishtype has been registered since last filter build
                 } else if (fishTypes.get(i).equals(newType)) {
-                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                    filterList.add(fishTypes.get(i));
-                    newType = null;
+                    //IF RESTORED is true (activity has been restored) add newType as filter option and set to unchecked
+                    //Seems to only be needed by earlier API levels like 19, without it could set an unchecked filter from before the restorestate as checked
+                    if(RESTORED) {
+                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
+                        RESTORED = false;
+                        Log.v(TAG, "Added newType skip = true");
+                    //If not restored add newType as filter option and set checked
+                    } else {
+                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                        filterList.add(fishTypes.get(i));
+                        Log.v(TAG, "Added newType skip = false"+fishTypes.get(i));
+                    }
 
                 //if not in the selected filter list, set option unchecked
                 } else {
@@ -221,95 +240,91 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //Add all fishtypes as filter options and set checked
             for (int i = 0; i < fishTypes.size(); i++) {
                 popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                Log.v(TAG, "258");
                 //IF not already in filterlist, add it
                 if (!filterList.contains(fishTypes.get(i))) {
                     filterList.add(fishTypes.get(i));
                 }
             }
         }
+
         //Add filter button last
         popupMenu.getMenu().add(1, 999, 0, "Filtrer");
         Log.v(TAG, "popup laget");
         return true;
     }
 
+    /** Sets listener to filter menu*/
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Log.v(TAG, "onMenuITemClicked");
+
+                //if item is checked, sets unchecked and vice versa
                 item.setChecked(!item.isChecked());
 
-                // Do other stuff
+                //IF item is checked
                 if(item.isChecked()){
-                    Log.v(TAG,"Item is checked");
-                    if(filterList.contains(item.getTitle())) {
 
-                    }
-                    else {
+                    //IF filterlist does not contain the fishtype, add it
+                    if(!filterList.contains(item.getTitle())) {
                         filterList.add((String) item.getTitle());
                     }
-                }
-                else if(!item.isChecked()){
-                    Log.v(TAG,"Item is not checked");
+                //IF item is NOT checked
+                } else if(!item.isChecked()){
+                    //IF filterlist contains the fishtype, remove it
                     if(filterList.contains(item.getTitle())){
                         filterList.remove(item.getTitle());
                     }
-
                 }
 
-
+                //IF item clicked equals id 999 (filter button), set FILTER_ACTIVATED and run filterMarkers()
                 if(item.getItemId()==999){
-
                     FILTER_ACTIVATED = 1;
                     filterMarkers();
                 }
-                // Keep the popup menu open
+
+                // Prevents filter menu from closing when clicking items in menu
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
                 item.setActionView(new View(getBaseContext()));
-                item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                    @Override
-                    public boolean onMenuItemActionExpand(MenuItem item) {
-                        return false;
-                    }
 
-                    @Override
-                    public boolean onMenuItemActionCollapse(MenuItem item) {
-                        return false;
-                    }
-                });
                 return false;
             }
         });
         return super.onPrepareOptionsMenu(menu);
     }
 
-
-
-
-
+    /** adds onClick functionality to option items */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {                               //Sets onClick functionality to menu items and search button
+    public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
 
+            //If filtermenu clicked
             case R.id.item_filter:
-                Log.v(TAG, "OnOptionsItemSelected");
+                //If any fishtypes are registered, show menu
                 if(FishLoc.getFishTypeList().size()!=0){
                     popupMenu.show();
+
+                //Else inform user
+                }else{
+                    Toast.makeText(this, "No fish types available", Toast.LENGTH_SHORT);
                 }
                 return true;
 
+                //If search button clicked, start autocomplete/search method
             case R.id.item_search:
                 onClickSearch();
                 return true;
 
+                //If Registrer lokasjon clicked, start RegisterActivity
             case R.id.item_regEvent:
                 startActivity(new Intent(this, RegisterActivity.class));
                 return true;
 
+                //If hjelp clicked, start HelpActivity
             case R.id.item_help:
                 startActivity(new Intent(this, HelpActivity.class));
                 return true;
@@ -320,63 +335,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-
+/** Adds markers/functionality to map when ready */
     @Override
-    public void onMapReady(GoogleMap googleMap) {                                       //Adds markers/functionality to map at startup when loaded
+    public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
         markerList = new ArrayList<>();
 
-        LatLng halden = new LatLng(59.12478, 11.38754);
-        /*gMap.addMarker(new MarkerOptions().position(halden)
-                .title("Marker in Halden"));*/
+        //IF code is restored (been paused/orientation change) move camera to the stored position from before the pause
         if (RESTORED) {
             gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(restoredCP,15,0,0)));
 
+        //Else run setLocationCode which checks permission and moves camera accordingly
         }
         else{
-            gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
+            setLocationEnabled();
         }
 
-
+        //Sets child event listener to firebase DB
         myRef.addChildEventListener(new ChildEventListener() {
+            //Adds children(objects) as soon as it detects a new child (Adds all children at startup)
             @Override
             public void onChildAdded(DataSnapshot fishLocsData, String prevChildKey) {
-                FishLoc fishLoc = fishLocsData.getValue(FishLoc.class);
 
+                //Initiates FishLoc objects
+                FishLoc fishLoc = fishLocsData.getValue(FishLoc.class);
+                //Creates Marker object, stores certain values from fishloc object in markers title and snippet, and sets custom icon
                 Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
                         .title(fishLoc.getFishType())
                         .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)));
-                /*gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
-                        .title(fishLoc.getFishType())
-                        .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
-                        .setTag(fishLoc.getId());*/
-                Log.v(TAG, "Mark added");
 
-                //gMap.addMarker(markerOpt).setTag(fishLoc.getId());
+                //sets Id as tag, cannot be done while initiating marker object
                 marker.setTag(fishLoc.getId());
-                /*if(FILTER_ACTIVATED==1){
-                    if(filterList.contains(fishLoc.getFishType())){
-                        marker.setVisible(true);
-                        markerList.add(marker);
-                    }
-                    else{
-                        marker.setVisible(false);
-                        markerList.add(marker);
-                    }
-                }
-                else {
-                    markerList.add(marker);
-                }*/
+                //Stores markers inn array for later
                 markerList.add(marker);
 
+                //IF filter has been activated the currently added object has been added while user have
+                //been using app, so it's stored in newType variable as it's needed to add new filter option correctly
                 if(FILTER_ACTIVATED==1){
+                    newType = fishLoc.getFishType();
 
-                        newType = fishLoc.getFishType();
-
-                    filterMarkers();
+                    Log.v(TAG, "Added newType CHILD ADDED");
                 }
+                //Force onCreateOptionsMenu to rebuild filter menu
                 invalidateOptionsMenu();
             }
 
@@ -393,30 +394,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onCancelled(DatabaseError databaseError) {}
         });
 
-        /*
-        myRef.addValueEventListener(new ValueEventListener() {                          //Adds database listener, runs at startup and when data is updated
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot fishLocsData: dataSnapshot.getChildren()) {           //Loads fishlocations and places markers
-                    FishLoc fishLoc = fishLocsData.getValue(FishLoc.class);
-                    Log.d(TAG, "Value is: " + dataSnapshot.getChildrenCount());
-                    gMap.addMarker(new MarkerOptions().position(new LatLng(fishLoc.getLat(),fishLoc.getLng()))
-                            .title(fishLoc.getFishType())
-                            .snippet("Dato: " + fishLoc.getTime() + "\nAgn: " + fishLoc.getBait() + "\nKommentar: " + fishLoc.getComment())
-                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_fish)))
-                            .setTag(fishLoc.getId());
-                }
-                invalidateOptionsMenu(); //Runs onPrepareOptionsMenu() to add fishtypes to filter button
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-
-        });*/
-
+        //MarkerClickListener runs updateBottomSheetContent onClick
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {           //Sets marker listener which loads marker data to bottom sheet
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -425,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
+        //Hides bottomSheet when user clicks somewhere on map
         gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {                 //Hides bottom sheet on map clicks
             @Override
             public void onMapClick(LatLng latLng) {
@@ -433,150 +411,153 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        gMap.setOnMapLongClickListener(this);
-
-        setLocationEnabled();
-        setDefaultUiSettings();
-
-
-    }
-
-    public void filterMarkers(){
-        //gMap.clear();
-        if(!RESTORED){
-            FILTER_ACTIVATED=1;
-            for(Marker m : markerList){
-                //if(FILTER_ACTIVATED==1){
-                    if(filterList.contains(m.getTitle())){
-                        Log.v(TAG,m.getTitle()+" is visible");
-                        m.setVisible(true);
-
-                    }
-                    else{
-                        m.setVisible(false);
-                        //Log.v(TAG,"Filtrert" + m.getTitle() + " " + filterList.get(0));
-                    }
-
+        //Sets longClickListener which starts RegisterActivity and sends latLng object as extra
+        gMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                startActivityForResult(new Intent(getBaseContext(), RegisterActivity.class)
+                        .putExtra("LatLng", latLng),0);
+                //startActivity(new Intent(getBaseContext(), RegisterActivity.class)
+                //        .putExtra("LatLng", latLng));
             }
-        }
-        RESTORED = false;
+        });
+
+        //MyLocationButtonClick runs checkLocationEnabled() to inform user if location not available
+        // (if position access have been disabled after app started it will still move camera to last known location)
+        gMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                checkLocationEnabled();
+                return false;
+            }
+        });
+
+        //Enables zoom control
+        gMap.getUiSettings().setZoomControlsEnabled(true);
+
     }
 
+    /**checks if location is enabled through GPS or network*/
+    private void checkLocationEnabled(){
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
 
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }catch (Exception ex){Log.v(TAG, ex.getMessage());}
+        try{
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        }catch (Exception ex){Log.v(TAG, ex.getMessage());}
 
-    private void updateBottomSheetContent(Marker marker) {                              //Updates bottom sheet text views with info from marker and displays the bottom sheet
-        /*FirebaseStorage storage = FirebaseStorage.getInstance();
-        // Create a storage reference from our app
-        StorageReference storageRef = storage.getReference();
+        //If both GPS and Network positioning are disabled, display AlertDialog
+        if(!gps_enabled && !network_enabled){
+            AlertDialog.Builder ad = new AlertDialog.Builder(this);
+            ad.setMessage(getResources().getString(R.string.no_location_access));
+            //Sets button with text and onClick function which opens location settings
+            ad.setPositiveButton(getResources().getString(R.string.change_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                }
+            });
+            //Sets another button which displays a toast when clicked
+            ad.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
 
-        // Create a reference with an initial file path and name
-        StorageReference pathReference = storageRef.child("mountains.jpg");
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(getBaseContext(),"Cannot update last known location", Toast.LENGTH_SHORT).show();
 
-        // Create a reference to a file from a Google Cloud Storage URI
-        StorageReference gsReference = storage.getReferenceFromUrl("gs://fishapp-ee352.appspot.com/");
-        StorageReference urlChild = gsReference.child("mountains.jpg");
-        // Create a reference from an HTTPS URL
-        // Note that in the URL, characters are URL escaped!
-        StorageReference httpsReference = storage.getReferenceFromUrl("https://firebasestorage.googleapis.com/b/bucket/o/images%20stars.jpg");
+                }
+            });
+            ad.show();
+        }
+    }
 
-        // Reference to an image file in Firebase Storage
-        StorageReference storageReference ;*/
+    /** Final step of the filtration process. Sets markers visibility to true/false based on filters checked*/
+    public void filterMarkers(){
+        FILTER_ACTIVATED=1;
+        for(Marker m : markerList){
+                if(filterList.contains(m.getTitle())){
+                    m.setVisible(true);
+                }else{
+                    m.setVisible(false);
+                }
+        }
+    }
+
+    /**Adds data to bottomsheet */
+    private void updateBottomSheetContent(Marker marker) {
+        //Creates connection to firebaseStorage, reference to Url and reference to image/child that matches marker tag(fishloc obj id)
         FirebaseStorage mFirebaseStorage = FirebaseStorage.getInstance();
         StorageReference mStorageRef = mFirebaseStorage.getReferenceFromUrl("gs://fishapp-ee352.appspot.com");
         StorageReference urlChild = mStorageRef.child(marker.getTag()+".jpg");
 
-        // ImageView in your Activity
-                ImageView imageView = (ImageView) bottomSheet.findViewById(R.id.markerImage);
-
-        // Load the image using Glide
-        GlideApp.with(this /* context */)
+        //Uses Glide to load image into imageview
+        ImageView imageView = (ImageView) bottomSheet.findViewById(R.id.markerImage);
+        GlideApp.with(this)
                 .load(urlChild)
                 .into(imageView);
+        //Adds data from markers title and snippet, into textviews
         TextView title = (TextView) bottomSheet.findViewById(R.id.marker_title);
         TextView snippet = (TextView) bottomSheet.findViewById(R.id.marker_snippet);
         title.setText(marker.getTitle());
         snippet.setText(marker.getSnippet());
+        //Sets state of bottomSheet
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
-
-    private void setDefaultUiSettings() {                                               //Adds map ui buttons
-        UiSettings uiSettings = gMap.getUiSettings();
-        uiSettings.setZoomControlsEnabled(true);
-        uiSettings.setMapToolbarEnabled(false);
-        uiSettings.setMyLocationButtonEnabled(true);
-
-    }
-
-
-
-
-
-    @Override
-    public void onMapLongClick(LatLng latLng) {                                         //Starts registerActivity on long clicks and brings latlng
-        startActivity(new Intent(this, RegisterActivity.class)
-                .putExtra("LatLng", latLng));
-    }
-
-    @Override
-    protected void onResume() {
-        //activityReopened = true;
-        //invalidateOptionsMenu();
-        super.onResume();
-        /*if (cp != null) {
-            gMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
-            cp = null;
-        }*/
-        Log.v(TAG," resuming STATE");
-    }
-
-    @Override
-    protected void onPause() {
-
-        Log.v(TAG," SAVING STATE");
-        super.onPause();
-    }
-
+    /** Stores filter data and coordinates from camera position to avoid it resetting on screen rotation*/
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList("filterlist",filterList);
         outState.putInt("filter_activated",FILTER_ACTIVATED);
-        Log.v(TAG," SAVING STATE");
-        //LatLng cpll = cp.target;
-        //cp = gMap.getCameraPosition();
+
         outState.putDouble("lat",gMap.getCameraPosition().target.latitude);
         outState.putDouble("lon",gMap.getCameraPosition().target.longitude);
     }
-
+    /** Restores the saved data, also sets RESTORED variable to true*/
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         filterList = savedInstanceState.getStringArrayList("filterlist");
         FILTER_ACTIVATED = savedInstanceState.getInt("filter_activated");
         restoredCP = new LatLng(savedInstanceState.getDouble("lat"),savedInstanceState.getDouble("lon"));
-        Log.v(TAG," RESTORING STATE");
         RESTORED = true;
-        SKIP = true;
-
     }
 
+    /** Handles the result of permission requests*/
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-    @AfterPermissionGranted(LOCATION_PERMISSION)                                      //Runs permission check, requests permission if not yet granted
+
+    /** Checks if location permission is granted*/
+    @AfterPermissionGranted(LOCATION_PERMISSION)
     private void setLocationEnabled() {
 
+        //IF permission granted, enables my location button, and if users last known location
+        //is available moves camera to position, else moves camera to Haldens coordinates
         if (EasyPermissions.hasPermissions(this, locationPermission)) {
             gMap.setMyLocationEnabled(true);
+            LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(location != null){
+                Log.v(TAG, location.toString());
+                double longitude = location.getLongitude();
+                double latitude = location.getLatitude();
+                gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(latitude,longitude), 15, 0, 0)));
+            } else{
+                gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(59.12478, 11.38754), 15, 0, 0)));
+            }
         } else {
+            gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(59.12478, 11.38754), 15, 0, 0)));
             EasyPermissions.requestPermissions(this, getString(R.string.no_location_permission),
                     LOCATION_PERMISSION, locationPermission);
         }
     }
-
-
 }
