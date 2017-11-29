@@ -50,17 +50,21 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageView fishImg;
     private String id;
 
+    //Used to control if input values are acceptable
     private boolean timeChecked = false;
     private boolean fTypeChecked = false;
     private boolean coordsChecked = false;
 
-    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations"); //Stores reference to parent "fishLocations" in firebase DB
+    //Stores reference to parent "fishLocations" in firebase DB
+    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations");
 
     private static final String TAG = "FISHLOC MESSAGE";
 
+    //To handle camera permission
     private static final int CAMERA_PERMISSION = 1;
     private String[] cameraPermission = {Manifest.permission.CAMERA};
 
+    //Variables used to take and store images
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
     private String mCurrentPhotoPath;
@@ -72,27 +76,32 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
-        setSupportActionBar(toolbar);                                                   //
+        //Adds custom toolbar/Actionbar
+        Toolbar toolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
 
+        //Enables Up button
         ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);                                             //Enables Up button
+        ab.setDisplayHomeAsUpEnabled(true);
 
         fTypeText = (TextInputEditText) findViewById(R.id.fishTypeText);
         coords = (TextInputEditText) findViewById(R.id.locText);
         timeText = (TextInputEditText) findViewById(R.id.timeText);
         fishImg = (ImageView) findViewById(R.id.fishImg);
 
-        fTypeText.addTextChangedListener(fishTypeWatcher);                              //
-        coords.addTextChangedListener(coordsWatcher);                                   //Sets textwatchers as listeners
-        timeText.addTextChangedListener(timeWatcher);                                   //
+        //Sets textwatchers as listeners
+        fTypeText.addTextChangedListener(fishTypeWatcher);
+        coords.addTextChangedListener(coordsWatcher);
+        timeText.addTextChangedListener(timeWatcher);
 
-        Calendar currentTime = Calendar.getInstance();                                  //Recieves systemdate
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");               //Specifies date format
-        String formattedDate = dateFormat.format(currentTime.getTime());                //Stores systemdate in requested format
-        timeText.setText(formattedDate);                                                //Sets det formatted date in time input field
+        //Stores system date in timeText field with a specific format
+        Calendar currentTime = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String formattedDate = dateFormat.format(currentTime.getTime());
+        timeText.setText(formattedDate);
 
-        if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to input field
+        //Checks for latlng object and sets coordinates to input field
+        if(getIntent().hasExtra("LatLng")){
             LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
 
             coords.setText(latLng.latitude +", "+latLng.longitude);
@@ -273,9 +282,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    /** Create temporary file in app
-     */
+    /** Creates filename and file */
     private File createImageFile() throws IOException {
+
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -286,49 +295,46 @@ public class RegisterActivity extends AppCompatActivity {
                 storageDir      /* directory */
         );
 
-        // Save a file: path for use with ACTION_VIEW intents
+        //Stores path to image
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
+    /** If picture is taken and accepted in camera activity, runs setPic() */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {     //If image is chosen a bitmap version is loaded into image view
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-
             setPic();
         }
     }
 
+    /** Scales down picture to reduce filesize based on picture size and custom measurements to suit imageview*/
     private void setPic() {
 
-        // Get the dimensions of the View
-        /*int targetW = fishImg.getWidth();
-        int targetH = fishImg.getHeight();*/
-
-        // Get the dimensions of the bitmap
+        //Receives image size
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
 
-        // Determine how much to scale down the image
+        //ScaleFactor based on image size and custom measurements
         int scaleFactor = Math.min(photoW/100, photoH/150);
 
-        // Decode the image file into a Bitmap sized to fill the View
+        // Decode image to bitmap size
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        //fishImg.setScaleType(ImageView.ScaleType.FIT_XY);
+
+        //Sets the smaller decoded image in fishImg imageview
         fishImg.setImageBitmap(bitmap);
     }
+
+    /** Handles the result of permission requests*/
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
