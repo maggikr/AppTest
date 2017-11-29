@@ -315,23 +315,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(FishLoc.getFishTypeList().size()!=0){
                     popupMenu.show();
                 }
-
                 return true;
-            case 0:
-                item.setChecked(true);
-                return false;
-            case 1:
-                return false;
-            case 2:
-                return false;
-            case 3:
-                return false;
-            case 4:
-                return false;
-            case 5:
-                return false;
-            case 6:
-                return false;
 
             case R.id.item_search:
                 onClickSearch();
@@ -344,10 +328,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.item_help:
                 startActivity(new Intent(this, HelpActivity.class));
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
-
 
     }
 

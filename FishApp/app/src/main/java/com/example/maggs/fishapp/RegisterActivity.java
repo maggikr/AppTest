@@ -3,13 +3,11 @@ package com.example.maggs.fishapp;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +35,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
-import java.util.regex.Matcher;
 
 import android.Manifest;
 import android.widget.Toast;
@@ -48,19 +45,26 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText coords;
-    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations"); //Connects to firebase and returns stored data under "fishLocations"
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_TAKE_PHOTO = 1;
-    private static final String TAG = "FISHLOC MESSAGE";
+    private TextInputEditText timeText;
+    private TextInputEditText fTypeText;
     private ImageView fishImg;
     private String id;
-    private TextInputEditText timeText;
-    private static final int CAMERA_PERMISSION = 1;
-    private TextInputEditText fTypeText;
-    private String[] cameraPermission = {Manifest.permission.CAMERA};
+
     private boolean timeChecked = false;
     private boolean fTypeChecked = false;
     private boolean coordsChecked = false;
+
+    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations"); //Stores reference to parent "fishLocations" in firebase DB
+
+    private static final String TAG = "FISHLOC MESSAGE";
+
+    private static final int CAMERA_PERMISSION = 1;
+    private String[] cameraPermission = {Manifest.permission.CAMERA};
+
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_TAKE_PHOTO = 1;
+    private String mCurrentPhotoPath;
+
 
 
     @Override
@@ -71,22 +75,24 @@ public class RegisterActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
         setSupportActionBar(toolbar);                                                   //
 
-        ActionBar ab = getSupportActionBar();                                           //Enables Up button
-        ab.setDisplayHomeAsUpEnabled(true);
-        fishImg = (ImageView) findViewById(R.id.fishImg);
-        timeText = (TextInputEditText) findViewById(R.id.timeText);
-        Calendar currentTime = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        String formattedDate = dateFormat.format(currentTime.getTime());
-        timeText.addTextChangedListener(timeWatcher);
-        timeText.setText(formattedDate);
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);                                             //Enables Up button
+
         fTypeText = (TextInputEditText) findViewById(R.id.fishTypeText);
-        fTypeText.addTextChangedListener(fishTypeWatcher);
-
-
         coords = (TextInputEditText) findViewById(R.id.locText);
-        coords.addTextChangedListener(coordsWatcher);
-        if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to edittext field
+        timeText = (TextInputEditText) findViewById(R.id.timeText);
+        fishImg = (ImageView) findViewById(R.id.fishImg);
+
+        fTypeText.addTextChangedListener(fishTypeWatcher);                              //
+        coords.addTextChangedListener(coordsWatcher);                                   //Sets textwatchers as listeners
+        timeText.addTextChangedListener(timeWatcher);                                   //
+
+        Calendar currentTime = Calendar.getInstance();                                  //Recieves systemdate
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");               //Specifies date format
+        String formattedDate = dateFormat.format(currentTime.getTime());                //Stores systemdate in requested format
+        timeText.setText(formattedDate);                                                //Sets det formatted date in time input field
+
+        if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to input field
             LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
 
             coords.setText(latLng.latitude +", "+latLng.longitude);
@@ -94,25 +100,38 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    /**Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity */
+    /**Simple Textwatchers for the more important input fields, checks if any chars are entered
+     * and that they match the allowed characters. If conditions are met, sets checked variable to true*/
+
+    private final TextWatcher fishTypeWatcher = new TextWatcher() {
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            fTypeChecked = false;
+        }
+        public void afterTextChanged(Editable s) {
+            if (s.length() == 0) {
+                fTypeText.setError("Required");
+            } else if(!s.toString().matches("[a-zA-Z? ]*")){
+                fTypeText.setError("Only letters");
+            }else {
+                fTypeChecked = true;
+            }
+        }
+    };
+
     private final TextWatcher timeWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             timeChecked = false;
         }
-
         public void afterTextChanged(Editable s) {
             if (s.length() == 0) {
-                Toast.makeText(getBaseContext(),"No date enter", Toast.LENGTH_LONG).show();
                 timeText.setError("Required");
-                //timeText.setVisibility(View.GONE);
-
             } else if(!s.toString().matches("[0-9-? ]*")){
                 timeText.setError("Only numbers and \"-\"");
-                //timeText.setText("You have entered : " + timeText.getText());
-            }
-            else {
+            } else {
                 timeChecked = true;
             }
         }
@@ -120,54 +139,22 @@ public class RegisterActivity extends AppCompatActivity {
 
     private final TextWatcher coordsWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
         }
-
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             coordsChecked = false;
         }
-
         public void afterTextChanged(Editable s) {
             if (s.length() == 0) {
-                //Toast.makeText(getBaseContext(),"No date enter", Toast.LENGTH_LONG).show();
                 coords.setError("Required");
-                //timeText.setVisibility(View.GONE);
-
             } else if(!s.toString().matches("[0-9-., ? ]*")){
                 coords.setError("Two numbers divided by ,");
-                //timeText.setText("You have entered : " + timeText.getText());
-            }
-            else {
+            } else {
                 coordsChecked = true;
             }
         }
     };
-    /**Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity */
-    private final TextWatcher fishTypeWatcher = new TextWatcher() {
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        }
-
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            fTypeChecked = false;
-        }
-
-        public void afterTextChanged(Editable s) {
-            if (s.length() == 0) {
-                fTypeText.setError("Required");
-                //timeText.setVisibility(View.GONE);
-
-            } else if(!s.toString().matches("[a-zA-Z? ]*")){
-                fTypeText.setError("Only letters");
-                //timeText.setText("You have entered : " + timeText.getText());
-            }else {
-                fTypeChecked = true;
-            }
-
-        }
-    };
-
-    /**Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity */
+    /**On register button click, checks if the textwatchers conditions have been met, else warns user*/
     public void onClickRegister(View view){
 
         if(fTypeChecked && coordsChecked && timeChecked){
@@ -180,51 +167,54 @@ public class RegisterActivity extends AppCompatActivity {
             String time = timeText.getText().toString();
             String comment = commentText.getText().toString();
 
+            //Splits coordinates to store lat and lng as separate values(latlng objects are difficult to read from firebase)
             String[] splitCoords;
             splitCoords = coords.getText().toString().split(",");
             Double lat = Double.parseDouble(splitCoords[0]);
             Double lng = Double.parseDouble(splitCoords[1]);
 
+            //Creates a more unique id by adding random number between 0-9999999, to date
             Random rand = new Random();
             int n = rand.nextInt(9999999);
             id = time + n;
+
+            //Initiate an object and store under our database reference
             FishLoc testLoc = new FishLoc(id, fType, lat, lng, bait, time, comment);
+            myRef.child(id).setValue(testLoc);
+
+            //If user have selected an image, run storeImage()
             if(fishImg.getDrawable() != null){
                 Log.v(TAG,"Bilde finnes");
                 storeImage();
             }
 
-            myRef.child(id).setValue(testLoc);
-
+            //Finishes activity, user returns to MainActivity
             finish();
-        }
-        else{
+
+        } else{
             Toast.makeText(this,"Please fill out the required fields",Toast.LENGTH_LONG).show();
+            fTypeText.setError("Required");
+            coords.setError("Required");
+            timeText.setError("Required");
         }
-        //startActivity(new Intent(this, MainActivity.class));
     }
+
+    /**Stores image from imageview in firebaseStorage*/
     public void storeImage(){
+
+        //Creates a reference to FirebaseStorage
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        // Create a storage reference from our app
-        StorageReference storageRef = storage.getReference().child(id + ".jpg");;
-        /*
-        // Create a reference to "mountains.jpg"
-        StorageReference mountainsRef = storageRef.child();
+        StorageReference storageRef = storage.getReference().child(id + ".jpg");
 
-        // Create a reference to 'images/mountains.jpg'
-        StorageReference mountainImagesRef = storageRef.child("images/mountains.jpg");
-
-        // While the file names are the same, the references point to different files
-        mountainsRef.getName().equals(mountainImagesRef.getName());    // true
-        mountainsRef.getPath().equals(mountainImagesRef.getPath());    // false
-        */
+        //receives image from imageview as bitmap,
         fishImg.setDrawingCacheEnabled(true);
         fishImg.buildDrawingCache();
         Bitmap bitmap = fishImg.getDrawingCache();
+
+        //Compresses bitmap and uploads with ByteArrayStream
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
-
         UploadTask uploadTask = storageRef.putBytes(data);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -235,17 +225,19 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.v(TAG, "Image upload successful");
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
             }
         });
     }
-                                         //Runs permission check, requests permission if not yet granted
-    public void onClickGetImage(View view) {
-        testMethod();
 
+    /**OnClick method for "Ta bilde", directs to checkCameraPermission. Setting this method as the
+     * @AfterPermissionGranted(CAMERA_PERMISSION) method, grants error because it takes a parameter*/
+    public void onClickGetImage(View view) {
+        checkCameraPermission();
     }
+
+    /**Checks if camera permission is granted, and acts accordingly*/
     @AfterPermissionGranted(CAMERA_PERMISSION)
-    private void testMethod(){
+    private void checkCameraPermission(){
         if (EasyPermissions.hasPermissions(this, cameraPermission)) {
             dispatchTakePictureIntent();
         } else {
@@ -254,27 +246,35 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-/*
-    private void dispatchTakePictureIntent() {                                          //Opens camera app
+    /** Starts an intent to take a picture */
+    private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        //Checks if there's a camera activity to handle intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }*/
 
+            // Creates a file for the picture
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                Log.v(TAG, "Error creatings file");
+            }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {     //If image is chosen a bitmap version is loaded into image view
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            /*Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            ImageView fishImg = (ImageView) findViewById(R.id.fishImg);
-            fishImg.setImageBitmap(imageBitmap);*/
-            setPic();
+            //Creates URI and stores it as extra in Intent
+            if (photoFile != null) {
+                Log.v(TAG, "File created!");
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.maggs.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
         }
     }
-    String mCurrentPhotoPath;
 
+    /** Create temporary file in app
+     */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -290,29 +290,15 @@ public class RegisterActivity extends AppCompatActivity {
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.v(TAG, "Error creatings file");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Log.v(TAG, "File created!");
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.maggs.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {     //If image is chosen a bitmap version is loaded into image view
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+
+            setPic();
         }
     }
+
     private void setPic() {
 
         // Get the dimensions of the View
@@ -345,14 +331,5 @@ public class RegisterActivity extends AppCompatActivity {
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-    /*@AfterPermissionGranted(RC_CAMERA)                                        //Runs permission check, requests permission if not yet granted
-    private void setLocationEnabled() {
 
-        if (EasyPermissions.hasPermissions(this, locationPermission)) {
-
-        } else {
-            EasyPermissions.requestPermissions(this, getString(R.string.no_location_permission),
-                    LOCATION_PERMISSION, locationPermission);
-        }
-    }*/
 }

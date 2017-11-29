@@ -109,7 +109,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="true"
         android:layout_toRightOf="@+id/textLayout3"
-        android:text="Add image"
+        android:text="Ta bilde"
         android:onClick="onClickGetImage"/>
     <Button
         android:id="@+id/registerBtn"
