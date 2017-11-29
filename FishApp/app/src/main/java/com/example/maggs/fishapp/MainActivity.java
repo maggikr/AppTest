@@ -65,29 +65,32 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
-    private GoogleMap gMap;                                                             //Will hold google map instance
-    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations"); //Connects to firebase and returns stored data under "fishLocations"
+    private GoogleMap gMap;
 
-    private View bottomSheet;                                                           //
-    private BottomSheetBehavior bottomSheetBehavior;                                    //Used to control bottomsheet
+    //Connects to firebase and returns stored data under "fishLocations"
+    private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations");
 
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;                                    //Variable for search/autocomplete methods
+    //Used to control bottomsheet
+    private View bottomSheet;
+    private BottomSheetBehavior bottomSheetBehavior;
 
-    private String[] locationPermission = {Manifest.permission.ACCESS_FINE_LOCATION};   //
-    private static final int LOCATION_PERMISSION = 1;                                   //variables to check permission
-    private static final int NETWORK_STATE_PERMISSION = 1;
+    //Variable for search/autocomplete method
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+
+    //Handles camera permission
+    private String[] locationPermission = {Manifest.permission.ACCESS_FINE_LOCATION};
+    private static final int LOCATION_PERMISSION = 1;
+
     private static final String TAG = "FISHLOC MESSAGE";
-    private SubMenu subMenu;
-    private PopupMenu popupMenu;
+
+    private PopupMenu popupMenu;            //filtermenu
     private ArrayList<String> filterList;
     private ArrayList<Marker> markerList;
-    private int FILTER_ACTIVATED = 0;
-    private boolean activityReopened;
+    private int FILTER_ACTIVATED = 0;       //Filter activated
+    private boolean RESTORED;               //Activity has been restored
+    private boolean SKIP;                   //Activity has been restored2
+    private LatLng restoredCP;              //Stores cameraposition on save state
     private String newType;
-    private boolean RESTORED;
-    private boolean SKIP;
-    private CameraPosition cp;
-    private LatLng restoredCP;
 
 
 
@@ -95,35 +98,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        //if (!activityReopened) {
-            setContentView(R.layout.activity_main);
-            // Run what do you want to do only once.
-            MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-            mapFragment.getMapAsync(this);
+        //Creates mapFragment and initializes map
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
-            Toolbar toolbar = findViewById(R.id.main_toolbar);                              //Adds custom toolbar/Actionbar
-            setSupportActionBar(toolbar);                                                   //
-            filterList = new ArrayList<>();
-            Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_menu_white_24dp);
-            toolbar.setOverflowIcon(drawable);
+        //Adds custom toolbar/Actionbar
+        Toolbar toolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
 
-            bottomSheet = findViewById(R.id.bottom_sheet);                                  //
-            bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);                    //
-            bottomSheetBehavior.setPeekHeight(450);                                         //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
-            bottomSheetBehavior.setHideable(true);                                          //
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            // To avoid onCreate() if it will be called a second time,
-            // so put the boolean to true
-            activityReopened = true;
-            Log.v(TAG,"KJØRT ON CREATE!");
-            if(!isNetworkAvailable()){
-                Toast.makeText(this, "No Internet connection detected", Toast.LENGTH_LONG).show();
+        //Set icon as overflow/menu button
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_menu_white_24dp);
+        toolbar.setOverflowIcon(drawable);
 
-            }
+        filterList = new ArrayList<>();
+
+        //Adds bottom sheet, sets peek height(initial height on click) and hidden state on startup
+        bottomSheet = findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior.setPeekHeight(450);
+        bottomSheetBehavior.setHideable(true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        //Check if network is available
+        if(!isNetworkAvailable()){
+            Toast.makeText(this, "No Internet connection detected", Toast.LENGTH_LONG).show();
+        }
 
     }
 
+    /** Checks if there are any network connections available, returns true/false if network object exists AND is connected */
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -131,12 +136,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    /** Creates Autocomplete/search field through intent*/
+    public void onClickSearch(){
 
-    public void onClickSearch(){                                                        //Opens search/autocomplete field
+        //Builds AutocompleteFilter used to narrow down search results to Norway
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setCountry("NO")
                 .build();
 
+        //Starts autocomplete intent and informs user if google play services are not installed/up to date,
+        // Or if google play service is not available
         try {
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
@@ -154,84 +163,71 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
+    /**Handles selected location from search/autocomplete */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {     //Handles selected location from search/autocomplete
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+
+            //Creates place object from selected location and moves "camera" to selected objects position
+            //Or prints status message in Log on error
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
-                Log.i(TAG, "Sted valgt");
                 gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(place.getLatLng(), 15, 0, 0)));
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 Log.i(TAG, status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
             }
         }
     }
 
-
+    /** Builds Option menu by setting main_menu as the menu and runs the wall of If tests to build filter correctly*/
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {                                     //Sets main_menu as actionbar menu
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
-       /* MenuItem menuItem = menu.findItem(R.id.item_filter);
-        subMenu = menuItem.getSubMenu();
-        subMenu.add(0, 1, 2, "Hei");*/
-        // id is idx+ my constant*/
 
+        //Creates view variable from menu item item_filter and use it to set up popupMenu(filter)
         final View menuItemView = findViewById(R.id.item_filter); // SAME ID AS MENU ID
         popupMenu = new PopupMenu(this, menuItemView);
-        //popupMenu.getMenu().add(0,1,0,"Knapp!");
+
+        //Stores fishtype array from FishLoc into fishTypes array
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
-        int filters = 0;
-        if(!RESTORED) {                                                                                  //If activity has NOT been restored
-            if (FILTER_ACTIVATED == 1) {
-                for (int i = 0; i < fishTypes.size(); i++) {
-                    //if(f)
-                    if (filterList.contains(fishTypes.get(i))) {
-                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                    } else if (fishTypes.get(i).equals(newType)) {
-                        if (!SKIP) {
-                            popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                            filterList.add(fishTypes.get(i));
-                        } else {
-                            popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
-                            SKIP = false;
-                        }
 
-                    } else {
-                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
-                    }
-                    filters++;
-                    //filterList.add(fishTypes.get(i));
-                    Log.v(TAG, "antall filter: " + filters + "antall typer:" + FishLoc.getFishTypeList().size() + " " + newType);
-                }
-                filterMarkers();
-            } else {
-                for (int i = 0; i < fishTypes.size(); i++) {
-                    filters++;
+
+        //IF user has activated filter, iterate through fishtype list
+        if (FILTER_ACTIVATED == 1) {
+            for (int i = 0; i < fishTypes.size(); i++) {
+
+                //IF the fishtype is the checked in filter, set option checked
+                if (filterList.contains(fishTypes.get(i))) {
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                    if (!filterList.contains(fishTypes.get(i))) {
-                        filterList.add(fishTypes.get(i));
-                    }
-                    Log.v(TAG, filterList.get(i) + "Added to filter");
+
+                //IF a new fishtype has been registered since last filter build add new checked filter option to menu and add to filterlist
+                } else if (fishTypes.get(i).equals(newType)) {
+                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                    filterList.add(fishTypes.get(i));
+                    newType = null;
+
+                //if not in the selected filter list, set option unchecked
+                } else {
+                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
                 }
             }
-        }
-        else{
+            //Filtrate markers according the checked/unchecked options in filter menu
+            filterMarkers();
+
+        //IF filter has not been activated (app just started/filter not used)
+        } else {
+            //Add all fishtypes as filter options and set checked
             for (int i = 0; i < fishTypes.size(); i++) {
-                filters++;
                 popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                //IF not already in filterlist, add it
                 if (!filterList.contains(fishTypes.get(i))) {
                     filterList.add(fishTypes.get(i));
                 }
-                Log.v(TAG, filterList.get(i) + "Added to filter");
             }
         }
-
+        //Add filter button last
         popupMenu.getMenu().add(1, 999, 0, "Filtrer");
         Log.v(TAG, "popup laget");
         return true;
@@ -239,17 +235,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        /*MenuItem menuItem = menu.findItem(R.id.item_filter);
-        SubMenu subMenu = menuItem.getSubMenu();
-        subMenu.clear();
-        */
-
-        /*
-        ArrayList<String> fishTypes = FishLoc.getFishTypeList();
-        Log.v(TAG, fishTypes.size()+" typer");
-        for(int i=0; i<fishTypes.size();i++){
-            subMenu.add(1, i, 0, fishTypes.get(i)).setCheckable(true);
-        }*/
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -346,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title("Marker in Halden"));*/
         if (RESTORED) {
             gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(restoredCP,15,0,0)));
-            cp = null;
+
         }
         else{
             gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(halden, 15, 0, 0)));
@@ -559,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         outState.putInt("filter_activated",FILTER_ACTIVATED);
         Log.v(TAG," SAVING STATE");
         //LatLng cpll = cp.target;
-        cp = gMap.getCameraPosition();
+        //cp = gMap.getCameraPosition();
         outState.putDouble("lat",gMap.getCameraPosition().target.latitude);
         outState.putDouble("lon",gMap.getCameraPosition().target.longitude);
     }
