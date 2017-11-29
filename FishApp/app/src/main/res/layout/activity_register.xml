@@ -10,17 +10,26 @@
     <include
         android:id="@+id/main_toolbar"
         layout="@layout/toolbar"/>
-
-    <EditText
-        android:id="@+id/fishTypeText"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/main_toolbar"
+        android:id="@+id/textLayout1">
+        <android.support.design.widget.TextInputEditText
+        android:id="@+id/fishTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:ems="10"
         android:hint="Fish type" />
+    </android.support.design.widget.TextInputLayout>
 
-    <EditText
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textLayout1"
+        android:id="@+id/textLayout2">
+        <android.support.design.widget.TextInputEditText
         android:id="@+id/baitText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,27 +37,43 @@
         android:layout_marginLeft="16dp"
         android:ems="10"
         android:hint="Agn" />
+    </android.support.design.widget.TextInputLayout>
 
-    <EditText
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textLayout2"
+        android:id="@+id/textLayout3">
+        <android.support.design.widget.TextInputEditText
         android:id="@+id/locText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/baitText"
         android:layout_marginLeft="16dp"
         android:ems="10"
-        android:hint="Lokasjon" />
-
-    <EditText
+        android:hint="Koordinater(LAT, LNG)" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textLayout3"
+        android:id="@+id/textLayout4">
+        <android.support.design.widget.TextInputEditText
         android:id="@+id/timeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/locText"
         android:layout_marginLeft="16dp"
         android:ems="10"
-        android:hint="Tid"
+        android:hint="Tid (DD-MM-YYYY)"
          />
-
-    <EditText
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textLayout4"
+        android:id="@+id/textLayout5">
+        <android.support.design.widget.TextInputEditText
         android:id="@+id/commentText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,25 +83,32 @@
         android:hint="Kommentar"
         android:maxLines="4"
         />
+    </android.support.design.widget.TextInputLayout>
 
-
-
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/main_toolbar"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/textLayout2">
     <ImageView
         android:id="@+id/fishImg"
-        android:layout_width="100dp"
+        android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/main_toolbar"
-        android:layout_toRightOf="@+id/baitText"
+        android:layout_gravity="center"
         android:layout_margin="5dp"/>
+    </FrameLayout>
+
 
     <Button
         android:id="@+id/imgBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/fishImg"
-        android:layout_toRightOf="@+id/fishTypeText"
-        android:layout_alignParentRight="true"
+        android:layout_below="@id/frameLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@+id/textLayout3"
         android:text="Add image"
         android:onClick="onClickGetImage"/>
     <Button

@@ -1,13 +1,17 @@
 package com.example.maggs.fishapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private String[] locationPermission = {Manifest.permission.ACCESS_FINE_LOCATION};   //
     private static final int LOCATION_PERMISSION = 1;                                   //variables to check permission
+    private static final int NETWORK_STATE_PERMISSION = 1;
     private static final String TAG = "FISHLOC MESSAGE";
     private SubMenu subMenu;
     private PopupMenu popupMenu;
@@ -112,10 +117,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // so put the boolean to true
             activityReopened = true;
             Log.v(TAG,"KJØRT ON CREATE!");
+            if(!isNetworkAvailable()){
+                Toast.makeText(this, "No Internet connection detected", Toast.LENGTH_LONG).show();
 
+            }
 
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
 
     public void onClickSearch(){                                                        //Opens search/autocomplete field
@@ -146,8 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
-                /*gMap.addMarker(new MarkerOptions().position(place.getLatLng())
-                        .title("here!"));*/
+                Log.i(TAG, "Sted valgt");
                 gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(place.getLatLng(), 15, 0, 0)));
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
@@ -174,43 +187,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
         Log.v(TAG, fishTypes.size()+" typer");
         int filters = 0;
-        if(!RESTORED){
-        if(FILTER_ACTIVATED==1){
-            for(int i=0; i<fishTypes.size();i++){
-                //if(f)
-                if(filterList.contains(fishTypes.get(i))){
-                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                }
-                else if(fishTypes.get(i).equals(newType)){
-                    if(!SKIP){
+        if(!RESTORED) {                                                                                  //If activity has NOT been restored
+            if (FILTER_ACTIVATED == 1) {
+                for (int i = 0; i < fishTypes.size(); i++) {
+                    //if(f)
+                    if (filterList.contains(fishTypes.get(i))) {
                         popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                    } else if (fishTypes.get(i).equals(newType)) {
+                        if (!SKIP) {
+                            popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                            filterList.add(fishTypes.get(i));
+                        } else {
+                            popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
+                            SKIP = false;
+                        }
+
+                    } else {
+                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
+                    }
+                    filters++;
+                    //filterList.add(fishTypes.get(i));
+                    Log.v(TAG, "antall filter: " + filters + "antall typer:" + FishLoc.getFishTypeList().size() + " " + newType);
+                }
+                filterMarkers();
+            } else {
+                for (int i = 0; i < fishTypes.size(); i++) {
+                    filters++;
+                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
+                    if (!filterList.contains(fishTypes.get(i))) {
                         filterList.add(fishTypes.get(i));
                     }
-                    else{
-                        popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
-                        SKIP = false;
-                    }
-
+                    Log.v(TAG, filterList.get(i) + "Added to filter");
                 }
-                else{
-                    popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
-                }
-                filters++;
-                //filterList.add(fishTypes.get(i));
-                Log.v(TAG, "antall filter: " +filters + "antall typer:"+ FishLoc.getFishTypeList().size()+" "+ newType);
             }
-            filterMarkers();
         }
         else{
-            for(int i=0; i<fishTypes.size();i++){
+            for (int i = 0; i < fishTypes.size(); i++) {
                 filters++;
                 popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                if(!filterList.contains(fishTypes.get(i))){
+                if (!filterList.contains(fishTypes.get(i))) {
                     filterList.add(fishTypes.get(i));
                 }
-                Log.v(TAG, filterList.get(i)+"Added to filter");
+                Log.v(TAG, filterList.get(i) + "Added to filter");
             }
-        }
         }
 
         popupMenu.getMenu().add(1, 999, 0, "Filtrer");
@@ -548,10 +567,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //activityReopened = true;
         //invalidateOptionsMenu();
         super.onResume();
-        if (cp != null) {
+        /*if (cp != null) {
             gMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
             cp = null;
-        }
+        }*/
+        Log.v(TAG," resuming STATE");
     }
 
     @Override
@@ -560,6 +580,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.v(TAG," SAVING STATE");
         super.onPause();
     }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -568,8 +589,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.v(TAG," SAVING STATE");
         //LatLng cpll = cp.target;
         cp = gMap.getCameraPosition();
-        outState.putDouble("lat",cp.target.latitude);
-        outState.putDouble("lon",cp.target.longitude);
+        outState.putDouble("lat",gMap.getCameraPosition().target.latitude);
+        outState.putDouble("lon",gMap.getCameraPosition().target.longitude);
     }
 
     @Override
@@ -583,6 +604,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SKIP = true;
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -599,7 +621,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LOCATION_PERMISSION, locationPermission);
         }
     }
-
 
 
 }

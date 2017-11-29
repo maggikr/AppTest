@@ -8,12 +8,15 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -34,21 +37,24 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import java.util.regex.Matcher;
+
 import android.Manifest;
+import android.widget.Toast;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText coords;
+    private TextInputEditText coords;
     private DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("fishLocations"); //Connects to firebase and returns stored data under "fishLocations"
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final String TAG = "FISHLOC MESSAGE";
     private ImageView fishImg;
     private String id;
-    private EditText timeText;
+    private TextInputEditText timeText;
     private static final int CAMERA_PERMISSION = 1;
     private String[] cameraPermission = {Manifest.permission.CAMERA};
 
@@ -63,34 +69,83 @@ public class RegisterActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();                                           //Enables Up button
         ab.setDisplayHomeAsUpEnabled(true);
         fishImg = (ImageView) findViewById(R.id.fishImg);
-        timeText = (EditText) findViewById(R.id.timeText);
+        timeText = (TextInputEditText) findViewById(R.id.timeText);
         Calendar currentTime = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         String formattedDate = dateFormat.format(currentTime.getTime());
+        timeText.addTextChangedListener(timeWatcher);
         timeText.setText(formattedDate);
 
+
+        coords = (TextInputEditText) findViewById(R.id.locText);
+        coords.addTextChangedListener(coordsWatcher);
         if(getIntent().hasExtra("LatLng")){                                             //Checks for latlng object and sets coordinates to edittext field
             LatLng latLng = getIntent().getExtras().getParcelable("LatLng");
-            coords = (EditText) findViewById(R.id.locText);
+
             coords.setText(latLng.latitude +", "+latLng.longitude);
         }
+
     }
+
+    private final TextWatcher timeWatcher = new TextWatcher() {
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            timeText.setError("Required");
+        }
+
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //timeText.setVisibility(View.VISIBLE);
+        }
+
+        public void afterTextChanged(Editable s) {
+            if (s.length() == 0) {
+                Toast.makeText(getBaseContext(),"No date enter", Toast.LENGTH_LONG).show();
+                timeText.setError("Required");
+                //timeText.setVisibility(View.GONE);
+
+            } else if(!s.toString().matches("[0-9-? ]*")){
+                timeText.setError("Only numbers and \"-\"");
+                //timeText.setText("You have entered : " + timeText.getText());
+            }
+        }
+    };
+
+    private final TextWatcher coordsWatcher = new TextWatcher() {
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            coords.setError("Required");
+        }
+
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //coords.setVisibility(View.VISIBLE);
+        }
+
+        public void afterTextChanged(Editable s) {
+            if (s.length() == 0) {
+                //Toast.makeText(getBaseContext(),"No date enter", Toast.LENGTH_LONG).show();
+                coords.setError("Required");
+                //timeText.setVisibility(View.GONE);
+
+            } else if(!s.toString().matches("[0-9-., ? ]*")){
+                coords.setError("Two numbers divided by .");
+                //timeText.setText("You have entered : " + timeText.getText());
+            }
+        }
+    };
 
 
     public void onClickRegister(View view){                                             //Recieves input, creates fishloc object, stores object in DB, returns user to mainActivity
-        EditText fTypeText = findViewById(R.id.fishTypeText);
+        TextInputEditText fTypeText = findViewById(R.id.fishTypeText);
         String fType = fTypeText.getText().toString();
 
-        EditText baitText = (EditText) findViewById(R.id.baitText);
+        TextInputEditText baitText = (TextInputEditText) findViewById(R.id.baitText);
         String bait = baitText.getText().toString();
 
-        timeText = (EditText) findViewById(R.id.timeText);
+        timeText = (TextInputEditText) findViewById(R.id.timeText);
         String time = timeText.getText().toString();
 
 
 
 
-        EditText commentText = (EditText) findViewById(R.id.commentText);
+        EditText commentText = (TextInputEditText) findViewById(R.id.commentText);
         String comment = commentText.getText().toString();
 
         String[] splitCoords;
@@ -229,8 +284,8 @@ public class RegisterActivity extends AppCompatActivity {
     private void setPic() {
 
         // Get the dimensions of the View
-        int targetW = fishImg.getWidth();
-        int targetH = fishImg.getHeight();
+        /*int targetW = fishImg.getWidth();
+        int targetH = fishImg.getHeight();*/
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -240,7 +295,7 @@ public class RegisterActivity extends AppCompatActivity {
         int photoH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        int scaleFactor = Math.min(photoW/100, photoH/150);
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
@@ -248,7 +303,7 @@ public class RegisterActivity extends AppCompatActivity {
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        fishImg.setScaleType(ImageView.ScaleType.FIT_XY);
+        //fishImg.setScaleType(ImageView.ScaleType.FIT_XY);
         fishImg.setImageBitmap(bitmap);
     }
     @Override
