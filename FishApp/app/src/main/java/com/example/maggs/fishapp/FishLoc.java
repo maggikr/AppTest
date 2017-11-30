@@ -8,6 +8,7 @@ import java.util.ArrayList;
  */
 
 public class FishLoc {
+
     private String id;
     private String fishType;
     private Double lat;
@@ -16,7 +17,6 @@ public class FishLoc {
     private String time;
     private String comment;
 
-    private static ArrayList<FishLoc> fishLocList = new ArrayList<>();
     private static ArrayList<String> fishTypeList = new ArrayList<>();
 
     public FishLoc(String id, String fishType, Double lat, Double lng, String bait, String time, String comment) {
@@ -30,19 +30,12 @@ public class FishLoc {
         addFishtype(fishType);
     }
 
-    public FishLoc(String id, String fishType, Double lat, Double lng){
-        this.id = id;
-        this.fishType = fishType;
-        this.lat = lat;
-        this.lng = lng;
-        fishLocList.add(this);
-    }
-
-    public FishLoc(){                                                                   //Constructor without parameter, needed to create objects from datasnapshot
+    /**Constructor without parameter, needed to create objects from datasnapshot*/
+    public FishLoc(){
 
     }
 
-        /** Getters and setters **/
+    /** Getters and setters **/
     public String getId() {
         return id;
     }
@@ -100,14 +93,6 @@ public class FishLoc {
         this.comment = comment;
     }
 
-    public static ArrayList<FishLoc> getFishLocList() {
-        return fishLocList;
-    }
-
-    public static void setFishLocList(ArrayList<FishLoc> fishLocList) {
-        FishLoc.fishLocList = fishLocList;
-    }
-
     public static ArrayList<String> getFishTypeList() {
         return fishTypeList;
     }
@@ -115,6 +100,8 @@ public class FishLoc {
     public static void setFishTypeList(ArrayList<String> fishTypeList) {
         FishLoc.fishTypeList = fishTypeList;
     }
+
+    /** Checks if fishtype exists in array, if not adds it to array, to avoid duplicates*/
     public static void addFishtype(String fishType){
         for (String ft : fishTypeList){
             if(ft.equals(fishType)){
@@ -123,7 +110,6 @@ public class FishLoc {
         }
         fishTypeList.add(fishType);
     }
-
 
     @Override
     public String toString() {

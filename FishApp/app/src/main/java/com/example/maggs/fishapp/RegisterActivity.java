@@ -193,7 +193,6 @@ public class RegisterActivity extends AppCompatActivity {
 
             //If user have selected an image, run storeImage()
             if(fishImg.getDrawable() != null){
-                Log.v(TAG,"Bilde finnes");
                 storeImage();
             }
 
@@ -273,7 +272,6 @@ public class RegisterActivity extends AppCompatActivity {
 
             //Creates URI and stores it as extra in Intent
             if (photoFile != null) {
-                Log.v(TAG, "File created!");
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.maggs.fileprovider",
                         photoFile);

@@ -2,24 +2,11 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light">
-        <!-- Customize your theme here. -->
+
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:popupBackground">#0b19ba</item>
 
     </style>
-    <!--
 
-        <style name="MyActionBar" parent="@style/ThemeOverlay.AppCompat.ActionBar">
-            <item name="titleTextColor">@android:color/white</item>
-            <item name="subtitleTextColor">@android:color/white</item>
-            <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
-        </style>
-
-            <style name="TitleText" parent="android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-                <item name="android:textColor">#DE0F17</item>
-                <item name="android:textSize">20sp</item>
-            </style>
-        -->
 </resources>

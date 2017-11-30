@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.maggs.fishapp">
-    //Informs google play that the app uses the camera, but it's not required to use the app
+    <!--Informs google play that the app uses the camera, but it's not required to use the app-->
     <uses-feature android:name="android.hardware.camera"
         android:required="false" />
-    //Grants access to internet and user location
 
+    <!--Permissions used-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.CAMERA" />
 
 
@@ -18,31 +17,20 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"> // Removes standard actionbar
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
+        <!--singleTop prevents mainActivity from reloading when going back up-->
         <activity android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:launchMode="singleTop">                        //Prevents mainActivity from reloading on resume
+            android:launchMode="singleTop">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity"
-            android:label="Logg inn"
-            android:parentActivityName="com.example.maggs.fishapp.MainActivity"/>
-
         <activity android:name=".RegisterActivity"
             android:label="Registrer lokasjon"
-            android:parentActivityName="com.example.maggs.fishapp.MainActivity"/>
-
-        <activity android:name=".ProfileActivity"
-            android:parentActivityName="com.example.maggs.fishapp.MainActivity"/>
-
-        <activity android:name=".SettingsActivity"
             android:parentActivityName="com.example.maggs.fishapp.MainActivity"/>
 
         <activity android:name=".HelpActivity"
@@ -50,9 +38,12 @@
             android:parentActivityName="com.example.maggs.fishapp.MainActivity">
         </activity>
 
+        <!-- Google maps API key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
+        <!-- Fileprovider used along with camera to store images privately in app -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.maggs.fileprovider"

@@ -201,17 +201,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Stores fishtype array from FishLoc into fishTypes array
         ArrayList<String> fishTypes = FishLoc.getFishTypeList();
-        Log.v(TAG, fishTypes.size()+" typer");
-        Log.v(TAG, filterList.size()+" typer");
 
         //IF user has activated filter, iterate through fishtype list
         if (FILTER_ACTIVATED == 1) {
             for (int i = 0; i < fishTypes.size(); i++) {
-                Log.v(TAG, "228");
+
                 //IF the fishtype is the checked in filter, set option checked
                 if (filterList.contains(fishTypes.get(i))) {
                     popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                    Log.v(TAG, "232");
+
                 //IF a new fishtype has been registered since last filter build
                 } else if (fishTypes.get(i).equals(newType)) {
                     //IF RESTORED is true (activity has been restored) add newType as filter option and set to unchecked
@@ -219,12 +217,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if(RESTORED) {
                         popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(false);
                         RESTORED = false;
-                        Log.v(TAG, "Added newType skip = true");
+
                     //If not restored add newType as filter option and set checked
                     } else {
                         popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
                         filterList.add(fishTypes.get(i));
-                        Log.v(TAG, "Added newType skip = false"+fishTypes.get(i));
+
                     }
 
                 //if not in the selected filter list, set option unchecked
@@ -240,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //Add all fishtypes as filter options and set checked
             for (int i = 0; i < fishTypes.size(); i++) {
                 popupMenu.getMenu().add(1, i, 0, fishTypes.get(i)).setCheckable(true).setChecked(true);
-                Log.v(TAG, "258");
+
                 //IF not already in filterlist, add it
                 if (!filterList.contains(fishTypes.get(i))) {
                     filterList.add(fishTypes.get(i));
@@ -250,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Add filter button last
         popupMenu.getMenu().add(1, 999, 0, "Filtrer");
-        Log.v(TAG, "popup laget");
+
         return true;
     }
 
@@ -310,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //Else inform user
                 }else{
-                    Toast.makeText(this, "No fish types available", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "No fish types available", Toast.LENGTH_SHORT).show();
                 }
                 return true;
 
@@ -374,8 +372,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //been using app, so it's stored in newType variable as it's needed to add new filter option correctly
                 if(FILTER_ACTIVATED==1){
                     newType = fishLoc.getFishType();
-
-                    Log.v(TAG, "Added newType CHILD ADDED");
                 }
                 //Force onCreateOptionsMenu to rebuild filter menu
                 invalidateOptionsMenu();
@@ -476,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /** Final step of the filtration process. Sets markers visibility to true/false based on filters checked*/
-    public void filterMarkers(){
+    private void filterMarkers(){
         FILTER_ACTIVATED=1;
         for(Marker m : markerList){
                 if(filterList.contains(m.getTitle())){
@@ -547,7 +543,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(location != null){
-                Log.v(TAG, location.toString());
                 double longitude = location.getLongitude();
                 double latitude = location.getLatitude();
                 gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(latitude,longitude), 15, 0, 0)));

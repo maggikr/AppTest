@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Need coordinator to handle bottomSheet -->
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,6 +14,7 @@
             layout="@layout/toolbar"/>
     </android.support.design.widget.AppBarLayout>
 
+    <!-- need the layout_behaviour to avoid toolbar not displaying properly -->
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/map"
@@ -33,7 +35,6 @@
         android:clipToPadding="true"
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
         >
-
 
         <TextView
             android:id="@+id/marker_title"

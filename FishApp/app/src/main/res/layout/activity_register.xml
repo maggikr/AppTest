@@ -10,6 +10,8 @@
     <include
         android:id="@+id/main_toolbar"
         layout="@layout/toolbar"/>
+
+    <!-- Using TextInputEditText, each requires their own TextInputLayout-->
     <android.support.design.widget.TextInputLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,7 +21,7 @@
         android:id="@+id/fishTypeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:hint="Fish type" />
     </android.support.design.widget.TextInputLayout>
@@ -34,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/fishTypeText"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:hint="Agn" />
     </android.support.design.widget.TextInputLayout>
@@ -49,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/baitText"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:hint="Koordinater(LAT, LNG)" />
     </android.support.design.widget.TextInputLayout>
@@ -63,7 +65,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/locText"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:hint="Tid (DD-MM-YYYY)"
          />
@@ -78,7 +80,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/timeText"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:hint="Kommentar"
         android:maxLines="4"
@@ -91,7 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/main_toolbar"
         android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@+id/textLayout2">
+        android:layout_toEndOf="@+id/textLayout2">
     <ImageView
         android:id="@+id/fishImg"
         android:layout_width="150dp"
@@ -100,7 +102,6 @@
         android:layout_margin="5dp"/>
     </FrameLayout>
 
-
     <Button
         android:id="@+id/imgBtn"
         android:layout_width="wrap_content"
@@ -108,7 +109,7 @@
         android:layout_below="@id/frameLayout"
         android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="true"
-        android:layout_toRightOf="@+id/textLayout3"
+        android:layout_toEndOf="@+id/textLayout3"
         android:text="Ta bilde"
         android:onClick="onClickGetImage"/>
     <Button
