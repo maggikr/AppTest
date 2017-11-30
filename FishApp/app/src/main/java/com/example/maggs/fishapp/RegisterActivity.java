@@ -239,7 +239,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**OnClick method for "Ta bilde", directs to checkCameraPermission. Setting this method as the
-     * @AfterPermissionGranted(CAMERA_PERMISSION) method, grants error because it takes a parameter*/
+     * afterPermissionGranted method, grants error because it takes a parameter*/
     public void onClickGetImage(View view) {
         checkCameraPermission();
     }

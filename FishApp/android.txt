@@ -1,0 +1,32 @@
+
+pynte meny
+markercluster
+exception handler for file not exists
+brukere
+Stoppe landscape mode i å resette
+kontrollere input (textwatcher?)
+
+sjekke on GPS tilgjengelig
+
+https://developer.android.com/reference/android/view/SubMenu.html
+https://stackoverflow.com/questions/9344160/how-to-add-submenu-items-to-actionbar-action-in-code
+
+http://free-icon-rainbow.com/tuna-fishing-free-icon-1/ link til logo
+https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html endret logo
+https://material.io/icons/ icons
+https://developer.android.com/training/camera/photobasics.html#TaskGallery ta bilde
+https://firebase.google.com/docs/storage/android/upload-files opplasting av bilder
+https://firebase.google.com/docs/storage/android/download-files   Nedlasting av bilder
+https://github.com/firebase/FirebaseUI-Android/blob/master/storage/README.md 	firebase UI/glide
+https://icons8.com/icon/51314/whole-fish fish marker
+https://developers.google.com/places/android-api/autocomplete places api autocomplete
+https://stackoverflow.com/questions/10311834/how-to-check-if-location-services-are-enabled gps enabled
+
+bugs:
+
+FishLoc
+Hvorfor lage appen?
+Enkel i bruk
+google maps api
+markers
+filtreringsfunksjon
